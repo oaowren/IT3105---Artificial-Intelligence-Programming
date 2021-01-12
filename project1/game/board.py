@@ -1,13 +1,15 @@
 import numpy as np
 
+
 class Board():
 
     def __init__(self, board_type="D", board_size=4, open_cells=[(2, 2)]):
         if board_type == "D":
             self.board = np.array([[1 for i in range(board_size)]
-                          for j in range(board_size)])
+                                   for j in range(board_size)])
         elif board_type == "T":
-            self.board = np.array([[1 for i in range(n+1)] for n in range(board_size)])
+            self.board = np.array([[1 for i in range(n+1)]
+                                   for n in range(board_size)])
         else:
             raise Exception(
                 "Board type must be either 'D' (Diamond) or 'T' (Triangle)")
@@ -24,9 +26,11 @@ class Board():
 
     def make_move(self, move_from, move_to):
         # A move consists of two tuples (x,y) where x denotes the number of the row and y the column
-        middle = ((move_from[0] + move_to[0])//2, (move_from[1] + move_to[1])//2)
+        middle = ((move_from[0] + move_to[0])//2,
+                  (move_from[1] + move_to[1])//2)
         if not self.check_legal_move(move_from, move_to, middle):
-            raise Exception("Illegal move. A peg must jump over a peg to an empty spot to be a legal move.")
+            raise Exception(
+                "Illegal move. A peg must jump over a peg to an empty spot to be a legal move.")
         self.pre_move()
         self.board[move_from] = 0
         self.board[middle] = 0
@@ -35,7 +39,7 @@ class Board():
 
     # TODO: update to ensure that only legal moves on hex-grid is allowed
     def check_legal_move(self, move_from, move_to, middle):
-        # 
+        #
         if move_from[0] == move_to[0]:
             if abs(move_to[1] - move_from[1]) != 2:
                 return False
