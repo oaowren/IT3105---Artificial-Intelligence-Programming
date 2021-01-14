@@ -4,6 +4,8 @@ import numpy as np
 class Board():
 
     def __init__(self, board_type="D", board_size=4, open_cells=[(2, 2)]):
+        # Set board type to access in check_legal_move
+        self.board_type = board_type
         if board_type == "D":
             self.board = np.array([[1 for i in range(board_size)]
                                    for j in range(board_size)])
@@ -37,15 +39,18 @@ class Board():
         # 2 indicates recently moved peg
         self.board[move_to] = 2
 
-    # TODO: update to ensure that only legal moves on hex-grid is allowed
     def check_legal_move(self, move_from, move_to, middle):
-        #
+        if self.board_type == "D" and abs(move_to[0] + move_to[1] - move_from[0] + move_from[1]) == 4:
+            return False
+        if self.board_type == "T" and move_to[0] + move_to[1] - move_from[0] + move_from[1] == 0:
+            return False
         if move_from[0] == move_to[0]:
             if abs(move_to[1] - move_from[1]) != 2:
                 return False
         if move_from[1] == move_to[1]:
             if abs(move_to[0] - move_from[0]) != 2:
                 return False
+
         return self.board[move_from] and not self.board[move_to] and self.board[middle]
 
     def pre_move(self):
