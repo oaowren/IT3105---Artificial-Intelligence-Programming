@@ -34,10 +34,10 @@ class Board():
             raise Exception(
                 "Illegal move. A peg must jump over a peg to an empty spot to be a legal move.")
         self.pre_move()
-        self.board[move_from] = 0
-        self.board[middle] = 0
+        self.board[move_from[0]][move_from[1]] = 0
+        self.board[middle[0]][middle[1]] = 0
         # 2 indicates recently moved peg
-        self.board[move_to] = 2
+        self.board[move_to[0]][move_to[1]] = 2
 
     def check_legal_move(self, move_from, move_to, middle):
         if self.board_type == "D" and abs(move_to[0] + move_to[1] - move_from[0] + move_from[1]) == 4:
@@ -50,8 +50,7 @@ class Board():
         if move_from[1] == move_to[1]:
             if abs(move_to[0] - move_from[0]) != 2:
                 return False
-
-        return self.board[move_from] and not self.board[move_to] and self.board[middle]
+        return self.board[move_from[0]][move_from[1]] and not self.board[move_to[0]][move_to[1]] and self.board[middle[0]][middle[1]]
 
     def pre_move(self):
         # Remove the previous 2 to only show the last move
