@@ -57,3 +57,13 @@ class Board():
         index = np.where(self.board == 2)
         if len(index[0]) != 0:
             self.board[index] = 1
+
+    def get_legal_moves(self, move_from):
+        legal_moves = []
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                middle = ((i + move_from[0])//2,
+                  (j + move_from[1])//2)
+                if self.check_legal_move(move_from, (i,j), middle):
+                    legal_moves.append((i,j))
+        return legal_moves
