@@ -26,34 +26,63 @@ class Board():
             print(i)
         print("-------------------\n")
 
-    def make_move(self, move_from, move_to):
+    def make_move(self, move):
         # A move consists of two tuples (x,y) where x denotes the number of the row and y the column
-        middle = ((move_from[0] + move_to[0])//2,
-                  (move_from[1] + move_to[1])//2)
-        if not self.check_legal_move(move_from, move_to, middle):
+        middle = ((move[0][0] + move[1][0])//2,
+                  (move[0][1] + move[1][1])//2)
+        if not self.check_legal_move(move):
             raise Exception(
                 "Illegal move. A peg must jump over a peg to an empty spot to be a legal move.")
         self.pre_move()
-        self.board[move_from[0]][move_from[1]] = 0
+        self.board[move[0][0]][move[0][1]] = 0
         self.board[middle[0]][middle[1]] = 0
         # 2 indicates recently moved peg
-        self.board[move_to[0]][move_to[1]] = 2
+        self.board[move[1][0]][move[1][1]] = 2
 
-    def check_legal_move(self, move_from, move_to, middle):
-        if self.board_type == "D" and abs(move_to[0] + move_to[1] - move_from[0] + move_from[1]) == 4:
+    def check_legal_move(self, move):
+        middle = ((move[0][0] + move[1][0])//2,
+                  (move[0][1] + move[1][1])//2)
+        if self.board[move[0][0]][move[0][1]] == 0 or self.board[middle[0]][middle[1]] == 0:
             return False
-        if self.board_type == "T" and move_to[0] + move_to[1] - move_from[0] + move_from[1] == 0:
-            return False
-        if move_from[0] == move_to[0]:
-            if abs(move_to[1] - move_from[1]) != 2:
-                return False
-        if move_from[1] == move_to[1]:
-            if abs(move_to[0] - move_from[0]) != 2:
-                return False
-        return self.board[move_from[0]][move_from[1]] and not self.board[move_to[0]][move_to[1]] and self.board[middle[0]][middle[1]]
+        dist = abs(move[1][0] + move[1][1] - (move[0][0] + move[0][1]))
+        if move[0][0] != move[1][0] and move[0][1] != move[1][1]:
+            if self.board_type == "T":
+                return dist == 4 and abs(move[0][0] - move[1][0]) == 2
+            if self.board_type == "D":
+                return dist == 0 and abs(move[0][0] - move[1][0]) == 2
+        else:
+            return dist == 2
 
     def pre_move(self):
         # Remove the previous 2 to only show the last move
-        index = np.where(self.board == 2)
-        if len(index[0]) != 0:
-            self.board[index] = 1
+        index = self.find_indices(2)
+        if len(index) != 0:
+            self.board[index[0][0]][index[0][1]] = 1
+
+    def find_indices(self, state):
+        indices = []
+        for i in range(len(self.board)):
+            for n in range(len(self.board[i])):
+                if self.board[i][n]==state:
+                    indices.append((i,n))
+        return indices
+
+    def get_all_legal_moves(self):
+        legal_moves = []
+        open_slots = self.find_indices(0)
+        for slot in open_slots:
+            for x in range(len(self.board)):
+                for y in range(len(self.board[x])):
+                    if self.check_legal_move(((x,y), slot)):
+                        legal_moves.append(((x,y), slot))
+        return legal_moves
+
+    def check_winning_state(self):
+        index1 = self.find_indices(1)
+        index2 = self.find_indices(2)
+        indices = index1+index2
+        return len(indices)==1
+
+    def check_losing_state(self):
+        moves=self.get_all_legal_moves()
+        return not self.check_winning_state() and len(moves)==0

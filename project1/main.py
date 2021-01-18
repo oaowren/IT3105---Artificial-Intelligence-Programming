@@ -1,10 +1,9 @@
 from game.board import Board
+from critic.critic import Critic
 
 
 if __name__ == "__main__":
-    board = Board(board_type="T", board_size=5, open_cells=[(2,2)])
+    board = Board(board_type="T", board_size=3, open_cells=[(0,0), (1,1), (2,0)])
+    critic = Critic(board)
     board.print_board()
-    board.make_move((4, 0), (2, 2))
-    board.print_board()
-    board.make_move((3, 0), (1, 2))
-    board.print_board()
+    print(critic.generate_game_states())
