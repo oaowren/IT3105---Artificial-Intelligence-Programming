@@ -39,6 +39,16 @@ class Board():
         # 2 indicates recently moved peg
         self.board[move[1][0]][move[1][1]] = 2
 
+    def board_state(self):
+        output = ""
+        for i in self.board:
+            for n in i:
+                if n == 2:
+                    # Could end in same game state through different moves, important to not distinguish between these
+                    output += "1"
+                output += str(n)
+        return output
+
     def check_legal_move(self, move):
         middle = ((move[0][0] + move[1][0])//2,
                   (move[0][1] + move[1][1])//2)
