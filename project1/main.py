@@ -83,6 +83,7 @@ if __name__ == "__main__":
     while True:
         prev_state, prev_action = board.board_state(), action
         board.make_move(action)
+        # TODO: Give reinforcement for current state
         if board.check_losing_state() or board.check_winning_state():
             break
         action = actor.select_action(board)
