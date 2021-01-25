@@ -43,9 +43,11 @@ if __name__ == "__main__":
     time.sleep(display_delay) #Sleep to display the board for some time
 
     # Run episodes
+    actor.reset_eligibility(board)
     while not board.check_losing_state() and not board.check_winning_state():
         board.print_board()
         selected_move = actor.select_action(board)
+        actor.update_eligibility(board, selected_move, 1)
         board.make_move(selected_move)
         boardVisualizer.draw_board(board.board, board.board_type)
         time.sleep(display_delay) #Sleep to display the board for some time
