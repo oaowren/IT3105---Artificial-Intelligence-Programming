@@ -46,20 +46,20 @@ class Actor:
                     best_reward = move_reward
             return best_move
 
-    def update_policy(self, board, move, td_error):
-        self.policy[(board.board_state(), move)] = (
-            self.policy[(board.board_state(), move)]
-            + self.lr * td_error * self.eligibility[(board.board_state(), move)]
+    def update_policy(self, board_state, move, td_error):
+        self.policy[(board_state, move)] = (
+            self.policy[(board_state, move)]
+            + self.lr * td_error * self.eligibility[(board_state, move)]
         )
 
-    def update_eligibility(self, board, move, elig):
+    def update_eligibility(self, board_state, move, elig):
         if elig == 1:
-            self.eligibility[(board.board_state(), move)] = elig
+            self.eligibility[(board_state, move)] = elig
         else:
-            self.eligibility[(board.board_state(), move)] = (
+            self.eligibility[(board_state, move)] = (
                 self.discount
                 * self.eli_dec
-                * self.eligibility[(board.board_state(), move)]
+                * self.eligibility[(board_state, move)]
             )
 
     def reset_eligibility(self, board):

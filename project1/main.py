@@ -3,6 +3,7 @@ from game.board_visualizer import BoardVisualizer
 from actor.actor import Actor
 from critic.critic import Critic
 import time
+import copy
 
 
 # ------ VARIABLES --------
@@ -29,6 +30,23 @@ epsilon = 0.1
 epsilon_decay = 0.1
 # -------------------------
 
+# ------- FUNCTIONS -------
+def find_saps(board):
+    saps = []
+    if board.check_losing_state() or board.check_winning_state():
+        return saps
+    else:
+        moves = board.get_all_legal_moves()
+        for move in moves:
+            board_copy = copy.deepcopy(board)
+            board_copy.make_move(move)
+            saps.append((board.board_state(), move))
+            saps = saps + find_saps(board_copy)
+        return saps
+
+
+# -------------------------
+
 # Main-function for running everything
 if __name__ == "__main__":
 
@@ -42,7 +60,6 @@ if __name__ == "__main__":
         initial_epsilon=epsilon,
         epsilon_decay_rate=epsilon_decay,
     )
-    actor.init_policy(board)
     critic = Critic(
         method=critic_method,
         nn_dimensions=critic_nn_dims,
@@ -50,17 +67,31 @@ if __name__ == "__main__":
         eligibility_decay=eligibility_decay_critic,
         discount_factor=discount_factor_critic,
     )
-    
+
     # Draw initial board state
     boardVisualizer.draw_board(board.board, board.board_type)
     time.sleep(display_delay)  # Sleep to display the board for some time
 
     # Run episodes
+    # TODO: Init V(s) for Critic
+    actor.init_policy(board)
+    # TODO: Run below code for each episode
     actor.reset_eligibility(board)
+    # TODO: critic.reset_eligibility(board)
+    action = actor.select_action(board)
+    # Repeat for each step of the episode
     while not board.check_losing_state() and not board.check_winning_state():
-        board.print_board()
-        selected_move = actor.select_action(board)
-        actor.update_eligibility(board, selected_move, 1)
-        board.make_move(selected_move)
+        prev_state, prev_action = board.board_state(), action
+        board.make_move(action)
+        action = actor.select_action(board)
+        actor.update_eligibility(prev_state, prev_action, 1)
+        td_error = 1  # TODO: Critic calculate TD-error
+        # TODO: Critic update eligibility
+        for sap in find_saps(board):
+            # TODO: Critic update V(s)
+            # TODO: Critic update eligiblity
+            actor.update_policy(sap[0], sap[1], td_error)
+            actor.update_eligibility(sap[0], sap[1], 0)
+
         boardVisualizer.draw_board(board.board, board.board_type)
         time.sleep(display_delay)  # Sleep to display the board for some time
