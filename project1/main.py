@@ -36,7 +36,6 @@ if __name__ == "__main__":
     boardVisualizer = BoardVisualizer(width=1000, height=800)
     actor = Actor(lr=lr_actor, eligibility_decay=eligibility_decay_actor, discount_factor=discount_factor_actor, initial_epsilon=epsilon, epsilon_decay_rate=epsilon_decay)
     actor.init_policy(board)
-    print(actor.policy)
     critic = Critic(method=critic_method, nn_dimensions=critic_nn_dims, lr=lr_critic, eligibility_decay=eligibility_decay_critic, discount_factor=discount_factor_critic)
     
     # Draw initial board state
