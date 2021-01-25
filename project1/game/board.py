@@ -5,18 +5,25 @@ class Board:
     def __init__(self, board_type="D", board_size=4, open_cells=[(2, 2)]):
         # Set board type to access in check_legal_move
         self.board_type = board_type
-        if board_type == "D":
+        self.board_size = board_size
+        self.open_cells = open_cells
+        self.board = []
+        self.reset_board()
+        
+
+    def reset_board(self):
+        if self.board_type == "D":
             self.board = np.array(
-                [[1 for i in range(board_size)] for j in range(board_size)]
+                [[1 for i in range(self.board_size)] for j in range(self.board_size)]
             )
-        elif board_type == "T":
+        elif self.board_type == "T":
             self.board = np.array(
-                [[1 for i in range(n + 1)] for n in range(board_size)]
+                [[1 for i in range(n + 1)] for n in range(self.board_size)]
             )
         else:
             raise Exception("Board type must be either 'D' (Diamond) or 'T' (Triangle)")
         try:
-            for cell in open_cells:
+            for cell in self.open_cells:
                 self.board[cell[0]][cell[1]] = 0
         except IndexError:
             raise Exception("Index of open cells must all be within the board")

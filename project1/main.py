@@ -80,13 +80,15 @@ if __name__ == "__main__":
     # TODO: critic.reset_eligibility(board)
     action = actor.select_action(board)
     # Repeat for each step of the episode
-    while not board.check_losing_state() and not board.check_winning_state():
+    while True:
         prev_state, prev_action = board.board_state(), action
         board.make_move(action)
+        if board.check_losing_state() or board.check_winning_state():
+            break
         action = actor.select_action(board)
         actor.update_eligibility(prev_state, prev_action, 1)
         td_error = 1  # TODO: Critic calculate TD-error
-        # TODO: Critic update eligibility
+        # TODO: Critic set eligibility to 1
         for sap in find_saps(board):
             # TODO: Critic update V(s)
             # TODO: Critic update eligiblity
@@ -95,3 +97,6 @@ if __name__ == "__main__":
 
         boardVisualizer.draw_board(board.board, board.board_type)
         time.sleep(display_delay)  # Sleep to display the board for some time
+    board.print_board()
+    board.reset_board()
+    board.print_board()
