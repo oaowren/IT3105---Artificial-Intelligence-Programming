@@ -96,7 +96,7 @@ def convert_diamond_board_shape(board):
         length = len(board)
         tmp = []
         for i in range(counter, len(board)):
-            tmp.append(board[length - 1][i])
+            tmp.append(board[length - i+counter-1][i])
         new_board.append(tmp)
         counter += 1
     return new_board
