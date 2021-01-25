@@ -1,4 +1,5 @@
 import random
+import copy
 
 class Actor():
 
@@ -7,6 +8,19 @@ class Actor():
         self.epsilon_decay = epsilon_decay_rate
         self.policy = {}
 
+    def init_policy(self, board):
+        if board.check_losing_state() or board.check_winning_state():
+            return 0
+        else:
+            moves = board.get_all_legal_moves()
+            print(moves)
+            for move in moves:
+                self.policy[(board.board_state(), move)] = 0
+                board_copy = copy.deepcopy(board)
+                board_copy.make_move(move)
+                self.init_policy(board_copy)
+            return 0
+
     def select_action(self, board):
         moves = board.get_all_legal_moves()
         random_choice = random.random()
@@ -14,13 +28,12 @@ class Actor():
             return random.choice(moves)
         else:
             best_move = moves[0]
+            best_reward = -10000
             for move in moves:
-                try: 
-                    try_move = self.policy[(board.board_state(), move)]
-                    if try_move > best_move:
-                        best_move = try_move
-                except KeyError:
-                    pass
+                move_reward = self.policy[(board.board_state(), move)]
+                if move_reward > best_reward:
+                    best_move = move
+                    best_reward = move_reward
             return best_move
     
     def update_policy(self, board, move, reward):

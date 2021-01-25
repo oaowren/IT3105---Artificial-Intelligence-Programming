@@ -8,7 +8,7 @@ import time
 # ------ VARIABLES --------
 # Board and Game Variables
 board_type = "D"                # "T" or "D"
-board_size = 4
+board_size = 3
 open_cells = [(2,2), (1,1)]
 number_of_episodes = 25
 display_episode = number_of_episodes - 1    # Display final run
@@ -30,11 +30,13 @@ epsilon_decay = 0.1
 
 # Main-function for running everything
 if __name__ == "__main__":
-    
+
     # Initialize all components
     board = Board(board_type=board_type, board_size=board_size, open_cells=open_cells)
     boardVisualizer = BoardVisualizer(width=1000, height=800)
     actor = Actor(lr=lr_actor, eligibility_decay=eligibility_decay_actor, discount_factor=discount_factor_actor, initial_epsilon=epsilon, epsilon_decay_rate=epsilon_decay)
+    actor.init_policy(board)
+    print(actor.policy)
     critic = Critic(method=critic_method, nn_dimensions=critic_nn_dims, lr=lr_critic, eligibility_decay=eligibility_decay_critic, discount_factor=discount_factor_critic)
     
     # Draw initial board state

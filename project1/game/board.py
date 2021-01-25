@@ -46,7 +46,8 @@ class Board():
                 if n == 2:
                     # Could end in same game state through different moves, important to not distinguish between these
                     output += "1"
-                output += str(n)
+                else:
+                    output += str(n)
         return output
 
     def check_legal_move(self, move):
