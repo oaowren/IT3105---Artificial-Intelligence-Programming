@@ -49,10 +49,6 @@ def find_saps(board):
 
 # Main-function for running everything
 if __name__ == "__main__":
-<<<<<<< HEAD
-    board = Board(board_type="T", board_size=3, open_cells=[(0,0), (1,1), (2,0)])
-    critic = Critic(board)
-=======
 
     # Initialize all components
     board = Board(board_type=board_type, board_size=board_size, open_cells=open_cells)
@@ -104,6 +100,4 @@ if __name__ == "__main__":
         time.sleep(display_delay)  # Sleep to display the board for some time
     board.print_board()
     board.reset_board()
->>>>>>> 00e6e0ba679d594aa25ff7fc6f9c8de5a97a29f3
     board.print_board()
-    print(critic.generate_game_states())
