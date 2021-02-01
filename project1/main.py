@@ -21,6 +21,7 @@ critic_nn_dims = (15, 20, 30, 5, 1)
 lr_critic = 0.1
 eligibility_decay_critic = 0.1
 discount_factor_critic = 0.1
+table_lookup = False
 
 # Actor Variables
 lr_actor = 0.1
@@ -44,6 +45,11 @@ def find_saps(board):
             saps = saps + find_saps(board_copy)
         return saps
 
+def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor, board, table_lookup):
+    if table_lookup:
+        return TableLookupCritic(board, lr, eligibility_decay, discount_factor)
+    return Critic(method,nn_dimensions, lr, eligibility_decay, discount_factor)
+
 
 # -------------------------
 
@@ -60,12 +66,14 @@ if __name__ == "__main__":
         initial_epsilon=epsilon,
         epsilon_decay_rate=epsilon_decay,
     )
-    critic = Critic(
+    critic = create_critic(
         method=critic_method,
         nn_dimensions=critic_nn_dims,
         lr=lr_critic,
         eligibility_decay=eligibility_decay_critic,
         discount_factor=discount_factor_critic,
+        board=board,
+        table_lookup = table_lookup
     )
 
     # Draw initial board state
