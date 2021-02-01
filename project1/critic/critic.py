@@ -3,8 +3,6 @@ import copy
 class Critic:
     def __init__(
         self,
-        method,
-        nn_dimensions,
         lr,
         eligibility_decay,
         discount_factor,
@@ -13,11 +11,8 @@ class Critic:
         self.discount_factor = discount_factor
         self.eli_dec = eligibility_decay
         self.eligibility = {}
-        self.values = # Datastruktur
+        self.values = {}
 
-    def init_nn(self):
-        #TODO: Init neural network
-        return self.lr
 
     def init_tl(self):
         #TODO: Iterate game states, set win to R and loss to -R

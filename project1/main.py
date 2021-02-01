@@ -2,6 +2,7 @@ from game.board import Board
 from game.board_visualizer import BoardVisualizer
 from actor.actor import Actor
 from critic.critic import Critic
+from critic.nn_critic import CriticNN
 import time
 import copy
 
@@ -16,7 +17,7 @@ display_episode = number_of_episodes - 1  # Display final run
 display_delay = 2  # Number of seconds between board updates in visualization
 
 # Critic Variables
-critic_method = "TL"  # "TL" or "NN"
+critic_method = "NN"  # "TL" or "NN"
 critic_nn_dims = (15, 20, 30, 5, 1)
 lr_critic = 0.1
 eligibility_decay_critic = 0.1
@@ -60,13 +61,24 @@ if __name__ == "__main__":
         initial_epsilon=epsilon,
         epsilon_decay_rate=epsilon_decay,
     )
-    critic = Critic(
-        method=critic_method,
-        nn_dimensions=critic_nn_dims,
-        lr=lr_critic,
-        eligibility_decay=eligibility_decay_critic,
-        discount_factor=discount_factor_critic,
+    critic = (
+        Critic(
+            lr=lr_critic,
+            eligibility_decay=eligibility_decay_critic,
+            discount_factor=discount_factor_critic,
+        )
+        if critic_method == "TL"
+        else (
+            CriticNN(
+                lr_critic,
+                critic_nn_dims,
+                eligibility_decay_critic,
+                discount_factor_critic,
+                len(board.board_state()),
+            )
+        )
     )
+    critic.model.modify_gradients([1,2,4,5])
 
     # Draw initial board state
     boardVisualizer.draw_board(board.board, board.board_type)
@@ -98,6 +110,6 @@ if __name__ == "__main__":
 
         boardVisualizer.draw_board(board.board, board.board_type)
         time.sleep(display_delay)  # Sleep to display the board for some time
-    board.print_board()
-    board.reset_board()
-    board.print_board()
+
+    boardVisualizer.draw_board(board.board, board.board_type)
+    time.sleep(display_delay + 5)  # Sleep to display the board for some time
