@@ -55,6 +55,7 @@ class Board:
                     output += "1"
                 else:
                     output += str(n)
+                output += " "
         return output
 
     def check_legal_move(self, move):
@@ -106,3 +107,10 @@ class Board:
     def check_losing_state(self):
         moves = self.get_all_legal_moves()
         return not self.check_winning_state() and len(moves) == 0
+
+    def get_reward(self):
+        if self.check_winning_state():
+            return 100
+        elif self.check_losing_state():
+            return -1
+        return 0

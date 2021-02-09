@@ -26,7 +26,7 @@ class SplitGD():
         self.critic = critic
 
     # Subclass this with something useful.
-    def modify_gradients(self,gradients):
+    def modify_gradients(self, gradients):
         gradients = self.critic.modify_gradients(gradients)
         return gradients
 
