@@ -1,7 +1,6 @@
 from game.board import Board
 from game.board_visualizer import BoardVisualizer
 from actor.actor import Actor
-from critic.critic import Critic
 from critic.nn_critic import CriticNN
 from critic.table_lookup_critic import TableLookupCritic
 import numpy as np
@@ -11,9 +10,9 @@ import copy
 
 # ------ VARIABLES --------
 # Board and Game Variables
-board_type = "T"  # "T" or "D"
+board_type = "D"  # "T" or "D"
 board_size = 3
-open_cells = [(2, 0),(2,2)]
+open_cells = [(2, 0), (2, 2)]
 number_of_episodes = 25
 display_episode = number_of_episodes - 1  # Display final run
 display_delay = 2  # Number of seconds between board updates in visualization
@@ -48,10 +47,16 @@ def find_saps(board):
             saps = saps + find_saps(board_copy)
         return saps
 
-def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor, board, table_lookup):
+
+def create_critic(
+    method, nn_dimensions, lr, eligibility_decay, discount_factor, board, table_lookup
+):
     if table_lookup:
         return TableLookupCritic(board, lr, eligibility_decay, discount_factor)
-    return Critic(method,nn_dimensions, lr, eligibility_decay, discount_factor)
+    return CriticNN(
+        lr, nn_dimensions, eligibility_decay, discount_factor, nn_dimensions[0], board
+    )
+
 
 def run_game_instance(board, actor, critic, visualize=False):
     actor.init_policy(board)
@@ -70,14 +75,16 @@ def run_game_instance(board, actor, critic, visualize=False):
         reward = board.get_reward()
         state_and_rewards.append((board.board_state(), reward))
         state_and_action.append((board.board_state(), action))
-        # TODO: Give reinforcement for current state
+        reward = board.get_reward()
         if board.check_losing_state() or board.check_winning_state():
             break
         action = actor.select_action(board)
         actor.update_eligibility(prev_state, prev_action, 1)
-        # TODO: Critic set eligibility to 1
-        if True: #if critic and actor should update TODO fix this
-            td_error = critic.calculate_td_error(prev_state, board.board_state(), reward)
+        critic.update_eligibility(prev_state, 1)
+        if True:  # if critic and actor should update TODO fix this
+            td_error = critic.calculate_td_error(
+                prev_state, board.board_state(), reward
+            )
             critic.update_expected_reward(state_and_rewards)
             actor.update(td_error, state_and_action)
 
@@ -87,7 +94,6 @@ def run_game_instance(board, actor, critic, visualize=False):
     board.print_board()
     board.reset_board()
     board.print_board()
-
 
 
 # -------------------------
@@ -112,7 +118,7 @@ if __name__ == "__main__":
         eligibility_decay=eligibility_decay_critic,
         discount_factor=discount_factor_critic,
         board=board,
-        table_lookup = True
+        table_lookup=False,
     )
 
     # Draw initial board state
@@ -123,4 +129,4 @@ if __name__ == "__main__":
     # Run episodes
     # TODO: Init V(s) for Critic
     for i in range(number_of_episodes):
-        run_game_instance(board,actor,critic)
+        run_game_instance(board, actor, critic)

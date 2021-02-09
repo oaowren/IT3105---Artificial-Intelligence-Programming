@@ -1,3 +1,4 @@
+import tensorflow as tf
 from tensorflow import keras as ks
 import critic.splitgd as SGD
 import random
@@ -35,27 +36,38 @@ class CriticNN:
 
     def modify_gradients(self, gradients):
         dvs = []
-        for i in range(len(gradients)):
-            dvs.append(gradients[i] / (-2*self.td_error))
+        for i in range(1,len(gradients)):
+            result = tf.math.divide(gradients[i], -2*self.td_error)
+            dvs.append(result)
         elig = []
         for i in range(len(dvs)):
-            elig.append(dvs[i] + self.eligibility[self.current_state] * self.eli_dec * self.discount_factor)
+            try: 
+                elig.append(dvs[i] + self.eligibility[self.current_state][i] * self.eli_dec * self.discount_factor)
+            except TypeError:
+                elig.append(dvs[i] + self.eligibility[self.current_state] * self.eli_dec * self.discount_factor)
         self.eligibility[self.current_state] = elig
-        for i in range(len(gradients)):
-            gradients[i] = gradients[i] + self.lr * self.td_error * self.eligibility[self.current_state][i]
+        for i in range(1,len(gradients)):
+            gradients[i] += self.lr * self.td_error * elig[i-1]
         return gradients
 
-    def calculate_td_error(self, reward, current_state, next_state):
+    def calculate_td_error(self, current_state, next_state, reward):
         self.current_state = current_state
         if next_state not in self.values.keys():
-            self.values[next_state] = 0
+            self.values[next_state] = random.uniform(0, 0.2)
         if current_state not in self.values.keys():
-            self.values[current_state] = 0
+            self.values[current_state] = random.uniform(0, 0.2)
         self.td_error = reward + self.discount_factor*self.values[next_state] - self.values[current_state]
         return self.td_error
 
     def update_eligibility(self, board_state, elig):
         self.eligibility[board_state] = elig
+
+    def update_expected_reward(self, sequence):
+        self.model.fit([[int(x) for x in state.split()] for state, reward in sequence], [reward for _, reward in sequence])
+        for (state, _) in sequence:
+            pred = self.model.model.predict([int(x) for x in state.split()])
+            print("HEI", pred)
+            self.values[state] = pred
 
     def reset_eligibility(self, board):
         return 0

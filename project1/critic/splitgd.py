@@ -37,7 +37,7 @@ class SplitGD():
         loss = self.model.loss(targets, predictions) # model.loss = the loss function
         return tf.reduce_mean(loss).numpy() if avg else loss
 
-    def fit(self, features, targets, epochs=1, mbs=1,vfrac=0.1,verbosity=1,callbacks=[]):
+    def fit(self, features, targets, epochs=1, mbs=1,vfrac=0.1,verbosity=0,callbacks=[]):
         params = self.model.trainable_weights
         train_ins, train_targs, val_ins, val_targs = split_training_data(features,targets,vfrac=vfrac)
         for cb in callbacks:    cb.on_train_begin()
