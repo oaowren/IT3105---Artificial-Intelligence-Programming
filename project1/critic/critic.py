@@ -11,7 +11,7 @@ class Critic:
         self.discount_factor = discount_factor
         self.eli_dec = eligibility_decay
         self.eligibility = {}
-        self.values = {}
+        self.values = 0 # Datastruktur
 
 
     def init_tl(self):

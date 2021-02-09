@@ -104,6 +104,13 @@ class Board:
         indices = index1 + index2
         return len(indices) == 1
 
+    def get_reward(self):
+        if self.check_winning_state():
+            return 100
+        if self.check_losing_state():
+            return -1
+        return 0
+
     def check_losing_state(self):
         moves = self.get_all_legal_moves()
         return not self.check_winning_state() and len(moves) == 0

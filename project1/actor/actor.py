@@ -16,6 +16,9 @@ class Actor:
         self.discount = discount_factor
         self.lr = lr
         self.eli_dec = eligibility_decay
+        self.alpha = 0.8
+        self.gamma = 0.8
+        self.lam = 0.99
         self.policy = {}
         self.eligibility = {}
 
@@ -44,6 +47,7 @@ class Actor:
                 if move_reward > best_reward:
                     best_move = move
                     best_reward = move_reward
+            print(best_reward)
             return best_move
 
     def update_policy(self, board_state, move, td_error):
@@ -61,6 +65,17 @@ class Actor:
                 * self.eli_dec
                 * self.eligibility[(board_state, move)]
             )
+    def update(self, delta, sequence):
+        """
+        This updates all the evaluations of states in the episode sequence based on eligibility traces
+        """
+        self.eligibility[sequence[-1]] = 1
+        
+        for state,action in sequence:
+            if not (state,action) in self.policy:
+                self.policy[(state,action)] = 0.1
+            self.policy[(state,action)] += self.alpha * delta * self.eligibility[(state,action)]
+            self.eligibility[(state,action)] *= self.gamma * self.lam
 
     def reset_eligibility(self, board):
         if board.check_losing_state() or board.check_winning_state():
