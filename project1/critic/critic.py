@@ -13,7 +13,7 @@ class Critic:
         self.discount_factor = discount_factor
         self.eli_dec = eligibility_decay
         self.eligibility = {}
-        self.values = # Datastruktur
+        self.values = 0 # Datastruktur
 
     def init_nn(self):
         #TODO: Init neural network
