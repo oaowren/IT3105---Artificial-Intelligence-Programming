@@ -23,16 +23,9 @@ class Actor:
         self.eligibility = {}
 
     def init_policy(self, board):
-        if board.check_losing_state() or board.check_winning_state():
-            return 0
-        else:
-            moves = board.get_all_legal_moves()
-            for move in moves:
-                self.policy[(board.board_state(), move)] = 0
-                board_copy = copy.deepcopy(board)
-                board_copy.make_move(move)
-                self.init_policy(board_copy)
-            return 0
+        moves = board.get_all_legal_moves()
+        for move in moves:
+            self.policy[(board.board_state(), move)] = 0
 
     def select_action(self, board):
         moves = board.get_all_legal_moves()
@@ -43,11 +36,13 @@ class Actor:
             best_move = moves[0]
             best_reward = -10000
             for move in moves:
+                if not (board.board_state(), move) in self.policy:
+                    self.policy[(board.board_state(), move)] = 0
                 move_reward = self.policy[(board.board_state(), move)]
                 if move_reward > best_reward:
                     best_move = move
                     best_reward = move_reward
-            print(best_reward)
+            # print(best_reward)
             return best_move
 
     def update_policy(self, board_state, move, td_error):

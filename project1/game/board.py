@@ -111,5 +111,5 @@ class Board:
         if self.check_winning_state():
             return 100
         elif self.check_losing_state():
-            return -1
-        return 0
+            return - (len(self.find_indices(1)) + len(self.find_indices(2))) * 5
+        return -0.1

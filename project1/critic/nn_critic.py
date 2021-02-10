@@ -27,8 +27,8 @@ class CriticNN:
 
     def init_nn(self, input_length):
         model = ks.Sequential()
-        model.add(ks.layers.Embedding(input_length = input_length, input_dim = 10000, output_dim = self.nn_dims[0]))
-        for i in self.nn_dims[1:]:
+        model.add(ks.Input(shape=(input_length, )))
+        for i in self.nn_dims:
             model.add(ks.layers.Dense(i))
         model.compile(optimizer=ks.optimizers.SGD(learning_rate=(self.lr)), loss=ks.losses.MeanSquaredError(), metrics=['accuracy'])
         model.summary()
@@ -65,12 +65,11 @@ class CriticNN:
     def update_expected_reward(self, sequence):
         self.model.fit([[int(x) for x in state.split()] for state, reward in sequence], [reward for _, reward in sequence])
         for (state, _) in sequence:
-            pred = self.model.model.predict([int(x) for x in state.split()])
-            print("HEI", pred)
-            self.values[state] = pred
+            pred = self.model.model.predict([[int(x) for x in state.split()]])
+            self.values[state] = pred[0][0]
 
-    def reset_eligibility(self, board):
-        return 0
+    def reset_eligibility(self):
+        self.eligibility = {}
 
     def update_value(self, state, value):
         self.values[state] = value

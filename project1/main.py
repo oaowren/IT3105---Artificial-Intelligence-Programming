@@ -10,27 +10,27 @@ import copy
 
 # ------ VARIABLES --------
 # Board and Game Variables
-board_type = "D"  # "T" or "D"
-board_size = 3
-open_cells = [(2, 0), (2, 2)]
-number_of_episodes = 25
+board_type = "T"  # "T" or "D"
+board_size = 4
+open_cells = [(1, 0)]
+number_of_episodes = 100
 display_episode = number_of_episodes - 1  # Display final run
 display_delay = 2  # Number of seconds between board updates in visualization
 
 # Critic Variables
 critic_method = "NN"  # "TL" or "NN"
-critic_nn_dims = (9, 20, 30, 5, 1)
-lr_critic = 0.1
-eligibility_decay_critic = 0.1
-discount_factor_critic = 0.1
+critic_nn_dims = (10, 20, 30, 5, 1)
+lr_critic = 0.001
+eligibility_decay_critic = 0.95
+discount_factor_critic = 0.95
 table_lookup = False
 
 # Actor Variables
 lr_actor = 0.1
-eligibility_decay_actor = 0.1
-discount_factor_actor = 0.1
-epsilon = 0.1
-epsilon_decay = 0.1
+eligibility_decay_actor = 0.95
+discount_factor_actor = 0.95
+epsilon = 0.4
+epsilon_decay = 0.9
 # -------------------------
 
 # ------- FUNCTIONS -------
@@ -59,12 +59,9 @@ def create_critic(
 
 
 def run_game_instance(board, actor, critic, visualize=False):
-    actor.init_policy(board)
-    # TODO: Run below code for each episode
     actor.reset_eligibility(board)
-    # TODO: critic.reset_eligibility(board)
+    critic.reset_eligibility()
     action = actor.select_action(board)
-    # Repeat for each step of the episode
     state_and_rewards = []
     state_and_rewards.append((board.board_state(), 0))
     state_and_action = []
@@ -75,9 +72,13 @@ def run_game_instance(board, actor, critic, visualize=False):
         reward = board.get_reward()
         state_and_rewards.append((board.board_state(), reward))
         state_and_action.append((board.board_state(), action))
-        reward = board.get_reward()
         if board.check_losing_state() or board.check_winning_state():
-            break
+            if board.check_winning_state():
+                print("WIN")
+                board.reset_board()
+                return 1
+            board.reset_board()
+            return 0
         action = actor.select_action(board)
         actor.update_eligibility(prev_state, prev_action, 1)
         critic.update_eligibility(prev_state, 1)
@@ -87,13 +88,9 @@ def run_game_instance(board, actor, critic, visualize=False):
             )
             critic.update_expected_reward(state_and_rewards)
             actor.update(td_error, state_and_action)
-
         if visualize:
             boardVisualizer.draw_board(board.board, board.board_type)
             time.sleep(display_delay)  # Sleep to display the board for some time
-    board.print_board()
-    board.reset_board()
-    board.print_board()
 
 
 # -------------------------
@@ -120,13 +117,13 @@ if __name__ == "__main__":
         board=board,
         table_lookup=False,
     )
-
-    # Draw initial board state
-    boardVisualizer.draw_board(board.board, board.board_type)
-    time.sleep(display_delay)  # Sleep to display the board for some time
-    sequence = {}
+    actor.init_policy(board)
 
     # Run episodes
     # TODO: Init V(s) for Critic
+    number_of_wins = 0
     for i in range(number_of_episodes):
-        run_game_instance(board, actor, critic)
+        actor.eps *= actor.eps_dec
+        print("Episode %d" % i)
+        number_of_wins += run_game_instance(board, actor, critic)
+    print("Finished with %d wins in %d episodes" % (number_of_wins, number_of_episodes))
