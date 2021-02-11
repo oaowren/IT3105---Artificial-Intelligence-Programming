@@ -29,7 +29,7 @@ table_lookup = False
 lr_actor = 0.1
 eligibility_decay_actor = 0.95
 discount_factor_actor = 0.95
-epsilon = 0.4
+epsilon = 0.5
 epsilon_decay = 0.9
 # -------------------------
 
@@ -59,8 +59,6 @@ def create_critic(
 
 
 def run_game_instance(board, actor, critic, visualize=False):
-    actor.reset_eligibility(board)
-    critic.reset_eligibility()
     action = actor.select_action(board)
     state_and_rewards = []
     state_and_rewards.append((board.board_state(), 0))
@@ -120,9 +118,10 @@ if __name__ == "__main__":
     actor.init_policy(board)
 
     # Run episodes
-    # TODO: Init V(s) for Critic
     number_of_wins = 0
     for i in range(number_of_episodes):
+        actor.reset_eligibility(board)
+        critic.reset_eligibility()
         actor.eps *= actor.eps_dec
         print("Episode %d" % i)
         number_of_wins += run_game_instance(board, actor, critic)
