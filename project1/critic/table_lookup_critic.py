@@ -2,10 +2,10 @@ class TableLookupCritic():
 
     def __init__(self, board, lr, eligibility_decay, discount_factor):
         self.board = board
-        self.gamma = 0.99
-        self.lam = 0.99
+        self.gamma = 0.90
+        self.lam = 0.15
         self.sap = {}
-        self.alpha = 0.99
+        self.alpha = 0.001
         self.expected_reward = {}
         self.eligibility = {}
     
