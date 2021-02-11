@@ -71,5 +71,4 @@ class Actor:
                 self.eligibility[(board.board_state(), move)] = 0
                 board_copy = copy.deepcopy(board)
                 board_copy.make_move(move)
-                #self.reset_eligibility(board_copy)
             return 0
