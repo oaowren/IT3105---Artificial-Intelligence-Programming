@@ -3,6 +3,7 @@ from game.board_visualizer import BoardVisualizer
 from actor.actor import Actor
 from critic.critic import Critic
 from critic.table_lookup_critic import TableLookupCritic
+from matplotlib import pyplot as plt
 import time
 import copy
 
@@ -10,11 +11,11 @@ import copy
 # ------ VARIABLES --------
 # Board and Game Variables
 board_type = "T"  # "T" or "D"
-board_size = 3
-open_cells = [(2, 0),(2,2)]
-number_of_episodes = 25
+board_size = 5
+open_cells = [(0, 0)]
+number_of_episodes = 500
 display_episode = number_of_episodes - 1  # Display final run
-display_delay = 2  # Number of seconds between board updates in visualization
+display_delay = 1  # Number of seconds between board updates in visualization
 
 # Critic Variables
 critic_method = "TL"  # "TL" or "NN"
@@ -77,9 +78,15 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
         if visualize:
             boardVisualizer.draw_board(board.board, board.board_type)
             time.sleep(display_delay)  # Sleep to display the board for some time
-    board.print_board()
+        if board.check_losing_state() or board.check_winning_state():
+            break
+        action = actor.select_action(board)
+    if visualize:
+        boardVisualizer.draw_board(board.board, board.board_type)
+        time.sleep(display_delay)  # Sleep to display the board for some time
+
+    remaining_pegs.append(board.get_remaining_pegs())
     board.reset_board()
-    board.print_board()
 
 
 
@@ -106,12 +113,17 @@ if __name__ == "__main__":
         discount_factor=discount_factor_critic,
         board=board,
     )
-
-    # Draw initial board state
-    boardVisualizer.draw_board(board.board, board.board_type)
-    time.sleep(display_delay)  # Sleep to display the board for some time
+    remaining_pegs = []
 
     # Run episodes
-    # TODO: Init V(s) for Critic
     for i in range(number_of_episodes):
-        run_game_instance(board,actor,critic)
+        print("Running training episode: {}".format(i+1))
+        run_game_instance(board,actor,critic, remaining_pegs)
+    actor.eps = -1
+    for i in range(number_of_episodes):
+        print("Running episode: {}".format(i+1))
+        run_game_instance(board,actor,critic, remaining_pegs)
+
+    run_game_instance(board,actor,critic, remaining_pegs,True)
+    plt.plot(remaining_pegs)
+    plt.show()
