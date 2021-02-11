@@ -50,8 +50,7 @@ def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor,
         return TableLookupCritic(board, lr, eligibility_decay, discount_factor)
     return Critic(method,nn_dimensions, lr, eligibility_decay, discount_factor)
 
-def run_game_instance(board, actor, critic, visualize=False):
-    actor.init_policy(board)
+def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
     # TODO: Run below code for each episode
     actor.reset_eligibility(board)
     # TODO: critic.reset_eligibility(board)
