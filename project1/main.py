@@ -65,11 +65,8 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
         board.make_move(action)
         reward = board.get_reward()
         state_and_rewards.append((board.board_state(), reward))
-        state_and_action.append((board.board_state(), action))
+        state_and_action.append((prev_state, action))
         # TODO: Give reinforcement for current state
-        if board.check_losing_state() or board.check_winning_state():
-            break
-        action = actor.select_action(board)
         actor.update_eligibility(prev_state, prev_action, 1)
         # TODO: Critic set eligibility to 1
         if True: #if critic and actor should update TODO fix this
