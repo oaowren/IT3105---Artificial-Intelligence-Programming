@@ -102,12 +102,22 @@ class Board:
         index2 = self.find_indices(2)
         indices = index1 + index2
         return len(indices) == 1
+   
+    def get_remaining_pegs(self):
+        pegs = 0
+        for n in self.board:
+            for i in n:
+                if i == 1 or i == 2:
+                    pegs +=1
+        return pegs
+
+
 
     def get_reward(self):
         if self.check_winning_state():
             return 100
         if self.check_losing_state():
-            return -1
+            return -1*self.get_remaining_pegs()
         return 0
 
     def check_losing_state(self):
