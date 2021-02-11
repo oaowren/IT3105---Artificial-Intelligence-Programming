@@ -4,6 +4,7 @@ from actor.actor import Actor
 from critic.nn_critic import CriticNN
 from critic.table_lookup_critic import TableLookupCritic
 import numpy as np
+from matplotlib import pyplot as plt
 import time
 import copy
 
@@ -15,7 +16,7 @@ board_size = 4
 open_cells = [(1, 0)]
 number_of_episodes = 100
 display_episode = number_of_episodes - 1  # Display final run
-display_delay = 2  # Number of seconds between board updates in visualization
+display_delay = 1  # Number of seconds between board updates in visualization
 
 # Critic Variables
 critic_method = "NN"  # "TL" or "NN"
@@ -47,11 +48,8 @@ def find_saps(board):
             saps = saps + find_saps(board_copy)
         return saps
 
-
-def create_critic(
-    method, nn_dimensions, lr, eligibility_decay, discount_factor, board, table_lookup
-):
-    if table_lookup:
+def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor, board):
+    if method == "TL":
         return TableLookupCritic(board, lr, eligibility_decay, discount_factor)
     return CriticNN(
         lr, nn_dimensions, eligibility_decay, discount_factor, nn_dimensions[0], board
@@ -71,6 +69,7 @@ def run_game_instance(board, actor, critic, visualize=False):
         state_and_rewards.append((board.board_state(), reward))
         state_and_action.append((board.board_state(), action))
         if board.check_losing_state() or board.check_winning_state():
+            remaining_pegs.append(board.get_remaining_pegs())
             if board.check_winning_state():
                 print("WIN")
                 board.reset_board()
@@ -89,6 +88,8 @@ def run_game_instance(board, actor, critic, visualize=False):
         if visualize:
             boardVisualizer.draw_board(board.board, board.board_type)
             time.sleep(display_delay)  # Sleep to display the board for some time
+
+
 
 
 # -------------------------
@@ -113,16 +114,18 @@ if __name__ == "__main__":
         eligibility_decay=eligibility_decay_critic,
         discount_factor=discount_factor_critic,
         board=board,
-        table_lookup=False,
     )
-    actor.init_policy(board)
+    remaining_pegs = []
 
     # Run episodes
-    number_of_wins = 0
     for i in range(number_of_episodes):
-        actor.reset_eligibility(board)
-        critic.reset_eligibility()
-        actor.eps *= actor.eps_dec
-        print("Episode %d" % i)
-        number_of_wins += run_game_instance(board, actor, critic)
-    print("Finished with %d wins in %d episodes" % (number_of_wins, number_of_episodes))
+        print("Running training episode: {}".format(i+1))
+        run_game_instance(board,actor,critic, remaining_pegs)
+    actor.eps = -1
+    for i in range(number_of_episodes):
+        print("Running episode: {}".format(i+1))
+        run_game_instance(board,actor,critic, remaining_pegs)
+
+    run_game_instance(board,actor,critic, remaining_pegs,True)
+    plt.plot(remaining_pegs)
+    plt.show()

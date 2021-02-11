@@ -16,16 +16,12 @@ class Actor:
         self.discount = discount_factor
         self.lr = lr
         self.eli_dec = eligibility_decay
-        self.alpha = 0.8
-        self.gamma = 0.8
-        self.lam = 0.99
+        self.alpha = 0.001
+        self.gamma = 0.9
+        self.lam = 0.5
         self.policy = {}
         self.eligibility = {}
 
-    def init_policy(self, board):
-        moves = board.get_all_legal_moves()
-        for move in moves:
-            self.policy[(board.board_state(), move)] = 0
 
     def select_action(self, board):
         moves = board.get_all_legal_moves()
@@ -35,21 +31,15 @@ class Actor:
         else:
             best_move = moves[0]
             best_reward = -10000
+
             for move in moves:
-                if not (board.board_state(), move) in self.policy:
+                if (board.board_state(), move) not in self.policy:
                     self.policy[(board.board_state(), move)] = 0
                 move_reward = self.policy[(board.board_state(), move)]
                 if move_reward > best_reward:
                     best_move = move
                     best_reward = move_reward
-            # print(best_reward)
             return best_move
-
-    def update_policy(self, board_state, move, td_error):
-        self.policy[(board_state, move)] = (
-            self.policy[(board_state, move)]
-            + self.lr * td_error * self.eligibility[(board_state, move)]
-        )
 
     def update_eligibility(self, board_state, move, elig):
         if elig == 1:
@@ -81,5 +71,4 @@ class Actor:
                 self.eligibility[(board.board_state(), move)] = 0
                 board_copy = copy.deepcopy(board)
                 board_copy.make_move(move)
-                self.reset_eligibility(board_copy)
             return 0
