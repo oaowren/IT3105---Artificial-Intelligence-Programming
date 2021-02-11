@@ -107,9 +107,12 @@ class Board:
         moves = self.get_all_legal_moves()
         return not self.check_winning_state() and len(moves) == 0
 
+    def get_remaining_pegs(self):
+        return (len(self.find_indices(1)) + len(self.find_indices(2)))
+
     def get_reward(self):
         if self.check_winning_state():
-            return 100
+            return 1000
         elif self.check_losing_state():
-            return - (len(self.find_indices(1)) + len(self.find_indices(2))) * 5
+            return - self.get_remaining_pegs() * 5
         return -0.1
