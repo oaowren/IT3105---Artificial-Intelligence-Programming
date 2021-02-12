@@ -14,9 +14,9 @@ class Actor:
         self.eps = initial_epsilon
         self.eps_dec = epsilon_decay_rate
 
-        self.alpha = 0.001
-        self.lam = 0.5
-        self.gamma = 0.9
+        self.alpha = lr
+        self.lam = eligibility_decay
+        self.gamma = discount_factor
         self.policy = {}
         self.eligibility = {}
 

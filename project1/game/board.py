@@ -114,5 +114,5 @@ class Board:
         if self.check_winning_state():
             return 20
         elif self.check_losing_state():
-            return - self.get_remaining_pegs() * 3
-        return -0.1
+            return - self.get_remaining_pegs()
+        return -0.001
