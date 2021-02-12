@@ -38,16 +38,6 @@ class Actor:
                     best_move = move
                     best_reward = move_reward
             return best_move
-
-    def update_eligibility(self, board_state, move, elig):
-        if elig == 1:
-            self.eligibility[(board_state, move)] = elig
-        else:
-            self.eligibility[(board_state, move)] = (
-                self.gamma
-                * self.lam
-                * self.eligibility[(board_state, move)]
-            )
     
     def update(self, delta, sequence):
         """
@@ -57,17 +47,9 @@ class Actor:
         
         for state,action in sequence:
             if not (state,action) in self.policy:
-                self.policy[(state,action)] = 0.1
+                self.policy[(state,action)] = 0
+            if not (state, action) in self.eligibility:
+                self.eligibility[(state,action)] = 1
             self.policy[(state,action)] += self.alpha * delta * self.eligibility[(state,action)]
             self.eligibility[(state,action)] *= self.gamma * self.lam
 
-    def reset_eligibility(self, board):
-        if board.check_losing_state() or board.check_winning_state():
-            return 0
-        else:
-            moves = board.get_all_legal_moves()
-            for move in moves:
-                self.eligibility[(board.board_state(), move)] = 0
-                board_copy = copy.deepcopy(board)
-                board_copy.make_move(move)
-            return 0

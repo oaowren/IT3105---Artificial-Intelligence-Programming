@@ -14,14 +14,14 @@ class CriticNN:
         input_length,
         board
     ):
-        self.lr = lr
+        self.alpha = lr
         self.nn_dims = nn_dims
-        self.discount_factor = discount_factor
-        self.eli_dec = eligibility_decay
+        self.gamma = discount_factor
+        self.lam = eligibility_decay
         self.eligibility = {}
         self.model = self.init_nn(input_length)
-        self.values = {}
-        self.td_error = 0
+        self.expected_reward = {}
+        self.delta = 0
         self.current_state = None
 
 
@@ -30,7 +30,7 @@ class CriticNN:
         model.add(ks.Input(shape=(input_length, )))
         for i in self.nn_dims:
             model.add(ks.layers.Dense(i))
-        model.compile(optimizer=ks.optimizers.SGD(learning_rate=(self.lr)), loss=ks.losses.MeanSquaredError(), metrics=['accuracy'])
+        model.compile(optimizer=ks.optimizers.SGD(learning_rate=(self.alpha)), loss=ks.losses.MeanSquaredError(), metrics=['accuracy'])
         model.summary()
         return SGD.SplitGD(model, self)
 
@@ -42,34 +42,33 @@ class CriticNN:
         elig = []
         for i in range(len(dvs)):
             try: 
-                elig.append(dvs[i] + self.eligibility[self.current_state][i] * self.eli_dec * self.discount_factor)
+                elig.append(dvs[i] + self.eligibility[self.current_state][i] * self.lam * self.gamma)
             except TypeError:
-                elig.append(dvs[i] + self.eligibility[self.current_state] * self.eli_dec * self.discount_factor)
+                elig.append(dvs[i] + self.eligibility[self.current_state] * self.lam * self.gamma)
         self.eligibility[self.current_state] = elig
         for i in range(1,len(gradients)):
-            gradients[i] += self.lr * self.td_error * elig[i-1]
+            gradients[i] += self.alpha * self.delta * elig[i-1]
         return gradients
 
-    def calculate_td_error(self, current_state, next_state, reward):
-        self.current_state = current_state
-        if next_state not in self.values.keys():
-            self.values[next_state] = random.uniform(0, 0.2)
-        if current_state not in self.values.keys():
-            self.values[current_state] = random.uniform(0, 0.2)
-        self.td_error = reward + self.discount_factor*self.values[next_state] - self.values[current_state]
+    def calculate_td_error(self, old_state, new_state, reward):
+        self.current_state = old_state
+        for state in [old_state, new_state]:
+            if state not in self.expected_reward:
+                self.expected_reward[state] = random.uniform(0, 0.2)
+        self.td_error = reward + self.gamma*self.expected_reward[new_state] - self.expected_reward[old_state]
         return self.td_error
 
-    def update_eligibility(self, board_state, elig):
-        self.eligibility[board_state] = elig
-
     def update_expected_reward(self, sequence):
-        self.model.fit([[int(x) for x in state.split()] for state, reward in sequence], [reward for _, reward in sequence])
+        if len(sequence) == 2:
+            self.eligibility[sequence[0][0]] = self.gamma * self.lam
+        self.eligibility[sequence[-1][0]] = 1
+        inputs = [[int(x) for x in state.split()] for state, _ in sequence[:-1]]
+        targets = [self.expected_reward[state] * self.gamma + reward for state, reward in sequence[1:]]
+        self.model.fit(inputs, targets)
         for (state, _) in sequence:
             pred = self.model.model.predict([[int(x) for x in state.split()]])
-            self.values[state] = pred[0][0]
-
-    def reset_eligibility(self):
-        self.eligibility = {}
+            print(pred)
+            self.expected_reward[state] = pred[0][0]
 
     def update_value(self, state, value):
-        self.values[state] = value
+        self.expected_reward[state] = value
