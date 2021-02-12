@@ -112,7 +112,7 @@ class Board:
 
     def get_reward(self):
         if self.check_winning_state():
-            return 1000
+            return 100
         elif self.check_losing_state():
-            return - self.get_remaining_pegs() * 5
+            return - self.get_remaining_pegs()
         return -0.1

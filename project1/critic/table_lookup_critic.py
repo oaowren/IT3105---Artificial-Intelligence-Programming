@@ -2,27 +2,12 @@ class TableLookupCritic():
 
     def __init__(self, board, lr, eligibility_decay, discount_factor):
         self.board = board
-        self.gamma = 0.90
-        self.lam = 0.15
-        self.sap = {}
-        self.alpha = 0.001
+        self.gamma = discount_factor
+        self.lam = eligibility_decay
+        self.alpha = lr
         self.expected_reward = {}
         self.eligibility = {}
     
-
-    def generate_game_states(self, board):
-        if board.check_winning_state():
-            return 1
-        elif board.check_losing_state():
-            return -1
-        else: 
-            moves = board.get_all_legal_moves()
-            for move in moves:
-                board_copy = board
-                board_copy.make_move(move)
-                self.sap[board_copy]=self.generate_game_states(board_copy)
-        return self.sap
-
     def update_expected_reward(self, sequence):
         if len(sequence) == 2:
             self.eligibility[sequence[0][0]] = self.gamma * self.lam
@@ -32,7 +17,6 @@ class TableLookupCritic():
             self.eligibility[state] *= self.gamma * self.lam
 
     def calculate_td_error(self, old_state, new_state, reward):
-
         for state in [old_state, new_state]:
             if state not in self.expected_reward:
                 self.expected_reward[state] = 0

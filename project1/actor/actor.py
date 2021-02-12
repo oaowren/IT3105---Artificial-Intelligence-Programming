@@ -13,12 +13,10 @@ class Actor:
     ):
         self.eps = initial_epsilon
         self.eps_dec = epsilon_decay_rate
-        self.discount = discount_factor
-        self.lr = lr
-        self.eli_dec = eligibility_decay
-        self.alpha = 0.001
-        self.gamma = 0.9
-        self.lam = 0.5
+
+        self.alpha = lr
+        self.lam = eligibility_decay
+        self.gamma = discount_factor
         self.policy = {}
         self.eligibility = {}
 
@@ -46,10 +44,11 @@ class Actor:
             self.eligibility[(board_state, move)] = elig
         else:
             self.eligibility[(board_state, move)] = (
-                self.discount
-                * self.eli_dec
+                self.gamma
+                * self.lam
                 * self.eligibility[(board_state, move)]
             )
+    
     def update(self, delta, sequence):
         """
         This updates all the evaluations of states in the episode sequence based on eligibility traces
