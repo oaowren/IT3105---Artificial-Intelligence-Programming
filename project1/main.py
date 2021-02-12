@@ -16,7 +16,7 @@ board_size = 4
 # For board_type = "D" and board_size = 4, open_cells must be either (1,2) or (2,1)
 open_cells = [(2, 1)]
 number_of_episodes = 20
-display_episode = number_of_episodes - 1  # Display final run
+display_episode = True  # Display final run
 display_delay = 1  # Number of seconds between board updates in visualization
 
 # Critic Variables
@@ -46,10 +46,9 @@ def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor,
 
 
 def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
-    # TODO: Run below code for each episode
-    # TODO: critic.reset_eligibility(board)
+    actor.eligibility = {}
+    critic.eligibility = {}
     action = actor.select_action(board)
-    # Repeat for each step of the episode
     state_and_rewards = []
     state_and_rewards.append((board.board_state(), board.get_reward()))
     state_and_action = []
@@ -72,6 +71,7 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
             remaining_pegs.append(board.get_remaining_pegs())
             if board.check_winning_state():
                 board.reset_board()
+                print("WIN")
                 return 1
             board.reset_board()
             return 0
@@ -107,7 +107,8 @@ if __name__ == "__main__":
         print("Running training episode: {}".format(i+1))
         run_game_instance(board,actor,critic, remaining_pegs,False)
         actor.eps *= epsilon_decay
-    actor.eps = -1
-    run_game_instance(board,actor,critic, remaining_pegs, True)
+    if display_episode:
+        actor.eps = -1
+        run_game_instance(board,actor,critic, remaining_pegs, True)
     plt.plot(remaining_pegs)
     plt.show()
