@@ -115,4 +115,4 @@ class Board:
             return 20
         elif self.check_losing_state():
             return - self.get_remaining_pegs()
-        return 0
+        return -0.001
