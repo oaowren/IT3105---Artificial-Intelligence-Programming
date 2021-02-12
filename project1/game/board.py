@@ -9,7 +9,6 @@ class Board:
         self.open_cells = open_cells
         self.board = []
         self.reset_board()
-        
 
     def reset_board(self):
         if self.board_type == "D":
@@ -55,6 +54,7 @@ class Board:
                     output += "1"
                 else:
                     output += str(n)
+                output += " "
         return output
 
     def check_legal_move(self, move):
@@ -106,3 +106,13 @@ class Board:
     def check_losing_state(self):
         moves = self.get_all_legal_moves()
         return not self.check_winning_state() and len(moves) == 0
+
+    def get_remaining_pegs(self):
+        return (len(self.find_indices(1)) + len(self.find_indices(2)))
+
+    def get_reward(self):
+        if self.check_winning_state():
+            return 20
+        elif self.check_losing_state():
+            return - self.get_remaining_pegs()
+        return -0.001
