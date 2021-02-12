@@ -14,12 +14,12 @@ import copy
 board_type = "T"  # "T" or "D"
 board_size = 4
 open_cells = [(1, 0)]
-number_of_episodes = 20
+number_of_episodes = 200
 display_episode = number_of_episodes - 1  # Display final run
 display_delay = 1  # Number of seconds between board updates in visualization
 
 # Critic Variables
-critic_method = "NN"  # "TL" or "NN"
+critic_method = "TL"  # "TL" or "NN"
 critic_nn_dims = (10, 20, 30, 5, 1)
 lr_critic = 0.001
 eligibility_decay_critic = 0.9
@@ -42,10 +42,12 @@ def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor,
     )
 
 
+
 def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
-    actor.eligibility = {}
-    critic.eligibility = {}
+    # TODO: Run below code for each episode
+    # TODO: critic.reset_eligibility(board)
     action = actor.select_action(board)
+    # Repeat for each step of the episode
     state_and_rewards = []
     state_and_rewards.append((board.board_state(), board.get_reward()))
     state_and_action = []
@@ -67,7 +69,6 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
         if board.check_losing_state() or board.check_winning_state():
             remaining_pegs.append(board.get_remaining_pegs())
             if board.check_winning_state():
-                print("WIN")
                 board.reset_board()
                 return 1
             board.reset_board()
@@ -102,13 +103,9 @@ if __name__ == "__main__":
     # Run episodes
     for i in range(number_of_episodes*2):
         print("Running training episode: {}".format(i+1))
-        run_game_instance(board,actor,critic, remaining_pegs)
+        run_game_instance(board,actor,critic, remaining_pegs,False)
         actor.eps *= epsilon_decay
     actor.eps = -1
-    # for i in range(number_of_episodes):
-    #     print("Running episode: {}".format(i+1))
-    #     run_game_instance(board,actor,critic, remaining_pegs)
-    # print(critic.expected_reward)
     run_game_instance(board,actor,critic, remaining_pegs, True)
     plt.plot(remaining_pegs)
     plt.show()
