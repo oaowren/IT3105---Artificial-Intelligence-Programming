@@ -11,16 +11,18 @@ import copy
 
 # ------ VARIABLES --------
 # Board and Game Variables
-board_type = "T"  # "T" or "D"
+board_type = "D"  # "T" or "D"
 board_size = 4
-open_cells = [(1, 0)]
+# For board_type = "D" and board_size = 4, open_cells must be either (1,2) or (2,1)
+open_cells = [(2, 1)]
 number_of_episodes = 20
 display_episode = number_of_episodes - 1  # Display final run
 display_delay = 1  # Number of seconds between board updates in visualization
 
 # Critic Variables
 critic_method = "NN"  # "TL" or "NN"
-critic_nn_dims = (10, 20, 30, 5, 1)
+# First input parameter must be equal to number of holes on board, e.g. type D size 4 = 16
+critic_nn_dims = (16, 20, 30, 5, 1)
 lr_critic = 0.001
 eligibility_decay_critic = 0.9
 discount_factor_critic = 0.9
@@ -30,7 +32,7 @@ lr_actor = 0.3
 eligibility_decay_actor = 0.9
 discount_factor_actor = 0.9
 epsilon = 0.9
-epsilon_decay = 0.9
+epsilon_decay = 0.8
 # -------------------------
 
 # ------- FUNCTIONS -------

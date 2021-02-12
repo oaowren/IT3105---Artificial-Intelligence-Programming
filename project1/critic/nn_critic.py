@@ -67,5 +67,4 @@ class CriticNN:
         self.model.fit(inputs, targets)
         for (state, _) in sequence:
             pred = self.model.model.predict([[int(x) for x in state.split()]])
-            print(pred)
             self.expected_reward[state] = pred[0][0]
