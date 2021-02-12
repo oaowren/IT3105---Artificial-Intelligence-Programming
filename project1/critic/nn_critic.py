@@ -21,7 +21,7 @@ class CriticNN:
         self.eligibility = {}
         self.model = self.init_nn(input_length)
         self.expected_reward = {}
-        self.delta = 0
+        self.delta = []
         self.current_state = None
 
 
@@ -37,7 +37,7 @@ class CriticNN:
     def modify_gradients(self, gradients):
         dvs = []
         for i in range(1,len(gradients)):
-            result = tf.math.divide(gradients[i], -2*self.td_error)
+            result = tf.math.divide(gradients[i], -2*self.delta)
             dvs.append(result)
         elig = []
         for i in range(len(dvs)):
@@ -55,8 +55,9 @@ class CriticNN:
         for state in [old_state, new_state]:
             if state not in self.expected_reward:
                 self.expected_reward[state] = random.uniform(0, 0.2)
-        self.td_error = reward + self.gamma*self.expected_reward[new_state] - self.expected_reward[old_state]
-        return self.td_error
+        td_error = reward + self.gamma*self.expected_reward[new_state] - self.expected_reward[old_state]
+        self.delta = td_error
+        return td_error
 
     def update_expected_reward(self, sequence):
         if len(sequence) == 2:

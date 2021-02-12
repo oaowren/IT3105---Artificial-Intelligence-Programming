@@ -11,8 +11,8 @@ import copy
 
 # ------ VARIABLES --------
 # Board and Game Variables
-board_type = "D"  # "T" or "D"
-board_size = 4
+board_type = "T"  # "T" or "D"
+board_size = 5
 # For board_type = "D" and board_size = 4, open_cells must be either (1,2) or (2,1)
 open_cells = [(2, 1)]
 number_of_episodes = 20
@@ -22,7 +22,7 @@ display_delay = 1  # Number of seconds between board updates in visualization
 # Critic Variables
 critic_method = "NN"  # "TL" or "NN"
 # First input parameter must be equal to number of holes on board, e.g. type D size 4 = 16
-critic_nn_dims = (16, 20, 30, 5, 1)
+critic_nn_dims = (15, 20, 30, 5, 1)
 lr_critic = 0.001
 eligibility_decay_critic = 0.9
 discount_factor_critic = 0.9
@@ -42,8 +42,6 @@ def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor,
     return CriticNN(
         lr, nn_dimensions, eligibility_decay, discount_factor, nn_dimensions[0], board
     )
-
-
 
 def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
     actor.eligibility = {}
