@@ -69,6 +69,3 @@ class CriticNN:
             pred = self.model.model.predict([[int(x) for x in state.split()]])
             print(pred)
             self.expected_reward[state] = pred[0][0]
-
-    def update_value(self, state, value):
-        self.expected_reward[state] = value
