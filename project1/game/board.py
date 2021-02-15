@@ -2,12 +2,14 @@ import numpy as np
 
 
 class Board:
-    def __init__(self, board_type="D", board_size=4, open_cells=[(2, 2)]):
+    def __init__(self, rewards, board_type, board_size, open_cells):
         # Set board type to access in check_legal_move
         self.board_type = board_type
         self.board_size = board_size
         self.open_cells = open_cells
         self.board = []
+        self.rewards = rewards
+        # Init board
         self.reset_board()
 
     def reset_board(self):
@@ -27,11 +29,6 @@ class Board:
         except IndexError:
             raise Exception("Index of open cells must all be within the board")
 
-    def print_board(self):
-        for i in self.board:
-            print(i)
-        print("-------------------\n")
-
     def make_move(self, move):
         # A move consists of two tuples (x,y) where x denotes the number of the row and y the column
         middle = ((move[0][0] + move[1][0]) // 2, (move[0][1] + move[1][1]) // 2)
@@ -44,6 +41,12 @@ class Board:
         self.board[middle[0]][middle[1]] = 0
         # 2 indicates recently moved peg
         self.board[move[1][0]][move[1][1]] = 2
+
+    def pre_move(self):
+        # Remove the previous 2 to only show the last move
+        index = self.find_indices(2)
+        if len(index) != 0:
+            self.board[index[0][0]][index[0][1]] = 1
 
     def board_state(self):
         output = ""
@@ -58,12 +61,15 @@ class Board:
         return output
 
     def check_legal_move(self, move):
+        # Find indices of possible middle peg (to be jumped over)
         middle = ((move[0][0] + move[1][0]) // 2, (move[0][1] + move[1][1]) // 2)
         if (
             self.board[move[0][0]][move[0][1]] == 0
             or self.board[middle[0]][middle[1]] == 0
         ):
+            # If move from or middle is 0 (no peg) = illegal move
             return False
+        # Check that the peg only moves over 1 peg and in correct directions
         dist = abs(move[1][0] + move[1][1] - (move[0][0] + move[0][1]))
         if move[0][0] != move[1][0] and move[0][1] != move[1][1]:
             if self.board_type == "T":
@@ -73,17 +79,12 @@ class Board:
         else:
             return dist == 2
 
-    def pre_move(self):
-        # Remove the previous 2 to only show the last move
-        index = self.find_indices(2)
-        if len(index) != 0:
-            self.board[index[0][0]][index[0][1]] = 1
-
-    def find_indices(self, state):
+    def find_indices(self, peg):
+        # Return all indices of a given type of peg on the board
         indices = []
         for i in range(len(self.board)):
             for n in range(len(self.board[i])):
-                if self.board[i][n] == state:
+                if self.board[i][n] == peg:
                     indices.append((i, n))
         return indices
 
@@ -98,10 +99,8 @@ class Board:
         return legal_moves
 
     def check_winning_state(self):
-        index1 = self.find_indices(1)
-        index2 = self.find_indices(2)
-        indices = index1 + index2
-        return len(indices) == 1
+        # If one peg remains
+        return self.get_remaining_pegs() == 1
 
     def check_losing_state(self):
         moves = self.get_all_legal_moves()
@@ -112,7 +111,7 @@ class Board:
 
     def get_reward(self):
         if self.check_winning_state():
-            return 20
+            return self.rewards[0]
         elif self.check_losing_state():
-            return - (self.get_remaining_pegs())
-        return -0.1
+            return (self.get_remaining_pegs()) * self.rewards[1]
+        return self.rewards[2]
