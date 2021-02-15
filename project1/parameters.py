@@ -32,10 +32,6 @@ class Parameters():
         self.epsilon_decay = 0.96
         # -------------------------
 
-    def scenario_size5_triangle_tl(self):
-        print("TEST")
-        self.lr_actor = 0.01
-
     def scenario_triangle_size5_nn(self):
         self.critic_method = "NN"
         self.critic_nn_dims = (15, 25, 30, 10, 1)
@@ -73,3 +69,7 @@ class Parameters():
         self.winning_reward = 20
         self.losing_reward_per_peg = -1
         self.discount_per_step = -0.1
+
+    def scenario_size5_triangle_tl(self):
+        print("TEST")
+        self.lr_actor = 0.01
