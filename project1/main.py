@@ -3,45 +3,52 @@ from game.board_visualizer import BoardVisualizer
 from actor.actor import Actor
 from critic.nn_critic import CriticNN
 from critic.table_lookup_critic import TableLookupCritic
-import numpy as np
+from parameters import Parameters
 from matplotlib import pyplot as plt
 import time
-import copy
 
 
 # ------ VARIABLES --------
+p = Parameters()
+scenario = p.scenario1()
+if scenario is not None:
+    scenario()
 # Board and Game Variables
-board_type = "T"  # "T" or "D"
-board_size = 5
-# For board_type = "D" and board_size = 4, open_cells must be either (1,2) or (2,1)
-open_cells = [(2, 1)]
-number_of_episodes = 1000
-display_episode = True  # Display final run
-display_delay = 1  # Number of seconds between board updates in visualization
+board_type = p.board_type
+board_size = p.board_size
+open_cells = p.open_cells
+number_of_episodes = p.number_of_episodes
+# Rewards
+winning_reward = p.winning_reward
+losing_reward_per_peg = p.losing_reward_per_peg
+discount_per_step = p.discount_per_step
+# Visualization
+display_episode = p.display_episode
+display_delay = p.display_delay
 
 # Critic Variables
-critic_method = "NN"  # "TL" or "NN"
-# First input parameter must be equal to number of holes on board, e.g. type D size 4 = 16
-critic_nn_dims = (15, 25, 30, 10, 1)
-lr_critic = 0.001
-eligibility_decay_critic = 0.95
-discount_factor_critic = 0.95
+critic_method = p.critic_method
+critic_nn_dims = p.critic_nn_dims
+lr_critic = p.lr_critic
+eligibility_decay_critic = p.eligibility_decay_critic
+discount_factor_critic = p.discount_factor_critic
 
 # Actor Variables
-lr_actor = 0.1
-eligibility_decay_actor = 0.9
-discount_factor_actor = 0.95
-epsilon = 0.9
-epsilon_decay = 0.96
+lr_actor = p.lr_actor
+eligibility_decay_actor = p.eligibility_decay_actor
+discount_factor_actor = p.discount_factor_actor
+epsilon = p.epsilon
+epsilon_decay = p.epsilon_decay
 # -------------------------
 
 # ------- FUNCTIONS -------
-def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor, board):
+def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor):
     if method == "TL":
-        return TableLookupCritic(board, lr, eligibility_decay, discount_factor)
+        return TableLookupCritic(lr, eligibility_decay, discount_factor)
     return CriticNN(
-        lr, nn_dimensions, eligibility_decay, discount_factor, nn_dimensions[0], board
+        lr, nn_dimensions, eligibility_decay, discount_factor
     )
+
 
 def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
     actor.eligibility = {}
@@ -57,9 +64,7 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
         reward = board.get_reward()
         state_and_rewards.append((board.board_state(), reward))
         state_and_action.append((prev_state, prev_action))
-        td_error = critic.calculate_td_error(
-            prev_state, board.board_state(), reward
-        )
+        td_error = critic.calculate_td_error(prev_state, board.board_state(), reward)
         critic.update_expected_reward(state_and_rewards)
         actor.update(td_error, state_and_action)
         if visualize:
@@ -77,13 +82,19 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
             return 0
         action = actor.select_action(board)
 
+
 # -------------------------
 
 # Main-function for running everything
 if __name__ == "__main__":
 
     # Initialize all components
-    board = Board(board_type=board_type, board_size=board_size, open_cells=open_cells)
+    board = Board(
+        rewards=[winning_reward, losing_reward_per_peg, discount_per_step],
+        board_type=board_type,
+        board_size=board_size,
+        open_cells=open_cells,
+    )
     boardVisualizer = BoardVisualizer(width=1000, height=800)
     actor = Actor(
         lr=lr_actor,
@@ -97,18 +108,17 @@ if __name__ == "__main__":
         nn_dimensions=critic_nn_dims,
         lr=lr_critic,
         eligibility_decay=eligibility_decay_critic,
-        discount_factor=discount_factor_critic,
-        board=board,
+        discount_factor=discount_factor_critic
     )
     remaining_pegs = []
 
     # Run episodes
     for i in range(number_of_episodes):
-        print("Running training episode: {}".format(i+1))
-        run_game_instance(board,actor,critic, remaining_pegs,False)
+        print("Running training episode: {}".format(i + 1))
+        run_game_instance(board, actor, critic, remaining_pegs, False)
         actor.eps *= epsilon_decay
     if display_episode:
         actor.eps = -1
-        run_game_instance(board,actor,critic, remaining_pegs, True)
+        run_game_instance(board, actor, critic, remaining_pegs, True)
     plt.plot(remaining_pegs)
     plt.show()

@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow import keras as ks
 import critic.splitgd as SGD
 import random
-import copy
 
 class CriticNN:
     def __init__(
@@ -10,16 +9,14 @@ class CriticNN:
         lr,
         nn_dims,
         eligibility_decay,
-        discount_factor,
-        input_length,
-        board
+        discount_factor
     ):
         self.alpha = lr
         self.nn_dims = nn_dims
         self.gamma = discount_factor
         self.lam = eligibility_decay
         self.eligibility = {}
-        self.model = self.init_nn(input_length)
+        self.model = self.init_nn(nn_dims[0])
         self.expected_reward = {}
         self.delta = 0
         self.current_state = None
@@ -41,7 +38,7 @@ class CriticNN:
             dvs.append(result)
         elig = []
         for i in range(len(dvs)):
-            elig.append(dvs[i] + self.eligibility[self.current_state] * (self.lam * self.gamma))
+            elig.append(dvs[i] + self.eligibility[self.current_state])
         for i in range(1,len(gradients)):
             gradients[i] += self.alpha * self.delta * elig[i-1]
         return gradients

@@ -2,8 +2,7 @@ import random
 
 class TableLookupCritic():
 
-    def __init__(self, board, lr, eligibility_decay, discount_factor):
-        self.board = board
+    def __init__(self, lr, eligibility_decay, discount_factor):
         self.gamma = discount_factor
         self.lam = eligibility_decay
         self.alpha = lr

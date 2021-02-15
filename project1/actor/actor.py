@@ -1,15 +1,14 @@
 import random
-import copy
 
 
 class Actor:
     def __init__(
         self,
-        lr=0.5,
-        eligibility_decay=0,
-        discount_factor=0.5,
-        initial_epsilon=0.1,
-        epsilon_decay_rate=0.1,
+        lr,
+        eligibility_decay,
+        discount_factor,
+        initial_epsilon,
+        epsilon_decay_rate,
     ):
         self.eps = initial_epsilon
         self.eps_dec = epsilon_decay_rate
@@ -40,9 +39,6 @@ class Actor:
             return best_move
     
     def update(self, delta, sequence):
-        """
-        This updates all the evaluations of states in the episode sequence based on eligibility traces
-        """
         self.eligibility[sequence[-1]] = 1
         
         for state,action in sequence:
