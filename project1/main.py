@@ -68,7 +68,6 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
         if board.check_losing_state() or board.check_winning_state():
             if critic_method == "NN":
                 critic.update_model(state_and_rewards)
-                critic.sequence_count = 0
             remaining_pegs.append(board.get_remaining_pegs())
             if board.check_winning_state():
                 board.reset_board()

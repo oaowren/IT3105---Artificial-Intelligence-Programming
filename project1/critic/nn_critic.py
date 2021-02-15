@@ -23,7 +23,6 @@ class CriticNN:
         self.expected_reward = {}
         self.delta = 0
         self.current_state = None
-        self.sequence_count = 0
 
 
     def init_nn(self, input_length):
@@ -62,7 +61,6 @@ class CriticNN:
         self.eligibility[sequence[-1][0]] = 1
         for state, _ in sequence[:-1]:
             self.eligibility[state] *=self.gamma * self.lam
-        self.sequence_count = len(sequence)
 
     def update_model(self, sequence):
         inputs = [[int(x) for x in state.split()] for state, _ in sequence[:-1]]
