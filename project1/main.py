@@ -10,7 +10,7 @@ import time
 
 # ------ VARIABLES --------
 p = Parameters()
-scenario = p.scenario1()
+scenario = p.scenario_triangle_size5_nn
 if scenario is not None:
     scenario()
 # Board and Game Variables
