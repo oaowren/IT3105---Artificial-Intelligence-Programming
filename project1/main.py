@@ -84,7 +84,6 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
             remaining_pegs.append(board.get_remaining_pegs())
             if board.check_winning_state():
                 board.reset_board()
-                print("WIN")
                 return 1
             board.reset_board()
             return 0
