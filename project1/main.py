@@ -10,7 +10,7 @@ import time
 
 # ------ VARIABLES --------
 p = Parameters()
-scenario = p.scenario1()
+scenario = p.scenario_size4_diamond_tl()
 if scenario is not None:
     scenario()
 # Board and Game Variables
@@ -39,6 +39,11 @@ eligibility_decay_actor = p.eligibility_decay_actor
 discount_factor_actor = p.discount_factor_actor
 epsilon = p.epsilon
 epsilon_decay = p.epsilon_decay
+
+# Visualization size
+height = p.height
+width = p.width
+
 # -------------------------
 
 # ------- FUNCTIONS -------
@@ -58,6 +63,9 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
     state_and_rewards.append((board.board_state(), board.get_reward()))
     state_and_action = []
     state_and_action.append((board.board_state(), action))
+    if visualize:
+        boardVisualizer.draw_board(board.board, board.board_type)
+        time.sleep(display_delay)  # Sleep to display the board for some time
     while True:
         prev_state, prev_action = board.board_state(), action
         board.make_move(action)
@@ -95,7 +103,7 @@ if __name__ == "__main__":
         board_size=board_size,
         open_cells=open_cells,
     )
-    boardVisualizer = BoardVisualizer(width=1000, height=800)
+    boardVisualizer = BoardVisualizer(width, height)
     actor = Actor(
         lr=lr_actor,
         eligibility_decay=eligibility_decay_actor,
@@ -118,7 +126,7 @@ if __name__ == "__main__":
         run_game_instance(board, actor, critic, remaining_pegs, False)
         actor.eps *= epsilon_decay
     if display_episode:
-        actor.eps = -1
+        actor.eps = 0
         run_game_instance(board, actor, critic, remaining_pegs, True)
     plt.plot(remaining_pegs)
     plt.show()
