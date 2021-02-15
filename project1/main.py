@@ -15,24 +15,24 @@ board_type = "T"  # "T" or "D"
 board_size = 5
 # For board_type = "D" and board_size = 4, open_cells must be either (1,2) or (2,1)
 open_cells = [(2, 1)]
-number_of_episodes = 20
+number_of_episodes = 1000
 display_episode = True  # Display final run
 display_delay = 1  # Number of seconds between board updates in visualization
 
 # Critic Variables
 critic_method = "NN"  # "TL" or "NN"
 # First input parameter must be equal to number of holes on board, e.g. type D size 4 = 16
-critic_nn_dims = (15, 20, 30, 5, 1)
+critic_nn_dims = (15, 25, 30, 10, 1)
 lr_critic = 0.001
-eligibility_decay_critic = 0.9
-discount_factor_critic = 0.9
+eligibility_decay_critic = 0.95
+discount_factor_critic = 0.95
 
 # Actor Variables
-lr_actor = 0.3
+lr_actor = 0.1
 eligibility_decay_actor = 0.9
-discount_factor_actor = 0.9
+discount_factor_actor = 0.95
 epsilon = 0.9
-epsilon_decay = 0.8
+epsilon_decay = 0.96
 # -------------------------
 
 # ------- FUNCTIONS -------
@@ -66,6 +66,8 @@ def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
             boardVisualizer.draw_board(board.board, board.board_type)
             time.sleep(display_delay)  # Sleep to display the board for some time
         if board.check_losing_state() or board.check_winning_state():
+            if critic_method == "NN":
+                critic.update_model(state_and_rewards)
             remaining_pegs.append(board.get_remaining_pegs())
             if board.check_winning_state():
                 board.reset_board()
@@ -101,7 +103,7 @@ if __name__ == "__main__":
     remaining_pegs = []
 
     # Run episodes
-    for i in range(number_of_episodes*2):
+    for i in range(number_of_episodes):
         print("Running training episode: {}".format(i+1))
         run_game_instance(board,actor,critic, remaining_pegs,False)
         actor.eps *= epsilon_decay

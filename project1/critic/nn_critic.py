@@ -21,7 +21,7 @@ class CriticNN:
         self.eligibility = {}
         self.model = self.init_nn(input_length)
         self.expected_reward = {}
-        self.delta = []
+        self.delta = 0
         self.current_state = None
 
 
@@ -41,11 +41,7 @@ class CriticNN:
             dvs.append(result)
         elig = []
         for i in range(len(dvs)):
-            try: 
-                elig.append(dvs[i] + self.eligibility[self.current_state][i] * self.lam * self.gamma)
-            except TypeError:
-                elig.append(dvs[i] + self.eligibility[self.current_state] * self.lam * self.gamma)
-        self.eligibility[self.current_state] = elig
+            elig.append(dvs[i] + self.eligibility[self.current_state] * (self.lam * self.gamma))
         for i in range(1,len(gradients)):
             gradients[i] += self.alpha * self.delta * elig[i-1]
         return gradients
@@ -63,9 +59,13 @@ class CriticNN:
         if len(sequence) == 2:
             self.eligibility[sequence[0][0]] = self.gamma * self.lam
         self.eligibility[sequence[-1][0]] = 1
+        for state, _ in sequence[:-1]:
+            self.eligibility[state] *=self.gamma * self.lam
+
+    def update_model(self, sequence):
         inputs = [[int(x) for x in state.split()] for state, _ in sequence[:-1]]
         targets = [self.expected_reward[state] * self.gamma + reward for state, reward in sequence[1:]]
         self.model.fit(inputs, targets)
-        for (state, _) in sequence:
-            pred = self.model.model.predict([[int(x) for x in state.split()]])
-            self.expected_reward[state] = pred[0][0]
+        preds = self.model.model.predict([[int(x) for x in state.split()] for state, _ in sequence])
+        for i in range(len(sequence)-1):
+            self.expected_reward[sequence[i][0]] = preds[i][0]
