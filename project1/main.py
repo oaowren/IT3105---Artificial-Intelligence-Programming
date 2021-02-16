@@ -8,11 +8,12 @@ from matplotlib import pyplot as plt
 import time
 
 
-# ------ VARIABLES --------
+# ------ PARAMETERS -------
 p = Parameters()
-scenario = p.scenario_triangle_size5_nn
+scenario = p.scenario_triangle_size5_tl
 if scenario is not None:
     scenario()
+
 # Board and Game Variables
 board_type = p.board_type
 board_size = p.board_size
