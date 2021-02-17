@@ -40,39 +40,39 @@ class Parameters():
         self.board_type = "T"
         self.board_size = 5
         self.open_cells = [(2, 1)]
-        self.number_of_episodes = 750
+        self.number_of_episodes = 900
         self.winning_reward = 20
         self.losing_reward_per_peg = -3
         self.discount_per_step = -0.2
         self.critic_method = "NN"
-        self.critic_nn_dims = (15, 25, 30, 10, 1)
+        self.critic_nn_dims = (15, 20, 30, 5, 1)
         self.lr_critic = 0.001
         self.eligibility_decay_critic = 0.95
         self.discount_factor_critic = 0.9
         self.lr_actor = 0.15
         self.eligibility_decay_actor = 0.8
         self.discount_factor_actor = 0.8
-        self.epsilon = 0.9
-        self.epsilon_decay = 0.9
+        self.epsilon = 0.99
+        self.epsilon_decay = 0.95
 
     def scenario_diamond_size4_nn(self):
         self.board_type = "D"
         self.board_size = 4
         self.open_cells = [(2, 1)]
-        self.number_of_episodes = 500
+        self.number_of_episodes = 750
         self.winning_reward = 20
         self.losing_reward_per_peg = -3
         self.discount_per_step = -0.2
         self.critic_method = "NN"
-        self.critic_nn_dims = (16, 25, 30, 10, 1)
+        self.critic_nn_dims = (16, 20, 30, 5, 1)
         self.lr_critic = 0.001
         self.eligibility_decay_critic = 0.95
         self.discount_factor_critic = 0.9
         self.lr_actor = 0.15
         self.eligibility_decay_actor = 0.8
         self.discount_factor_actor = 0.8
-        self.epsilon = 0.9
-        self.epsilon_decay = 0.9
+        self.epsilon = 0.99
+        self.epsilon_decay = 0.95
 
     def scenario_triangle_size5_tl(self):
         self.board_type = "T"

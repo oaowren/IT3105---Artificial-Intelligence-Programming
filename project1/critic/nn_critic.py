@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow import keras as ks
 import critic.splitgd as SGD
 import random
+import numpy as np
 
 class CriticNN:
     def __init__(
@@ -32,15 +33,10 @@ class CriticNN:
         return SGD.SplitGD(model, self)
 
     def modify_gradients(self, gradients):
-        dvs = []
-        for i in range(1,len(gradients)):
-            result = tf.math.divide(gradients[i], -2*self.delta)
-            dvs.append(result)
-        elig = []
-        for i in range(len(dvs)):
-            elig.append(dvs[i] + self.eligibility[self.current_state])
-        for i in range(1,len(gradients)):
-            gradients[i] += self.alpha * self.delta * elig[i-1]
+        gradients = np.array(gradients, dtype=object)
+        dvs = gradients / -2*self.delta
+        elig = dvs + self.eligibility[self.current_state]
+        gradients = gradients + self.alpha * self.delta * elig
         return gradients
 
     def calculate_td_error(self, old_state, new_state, reward):

@@ -10,7 +10,7 @@ import time
 
 # ------ PARAMETERS -------
 p = Parameters()
-scenario = p.scenario_triangle_size5_tl
+scenario = p.scenario_diamond_size4_nn
 if scenario is not None:
     scenario()
 
