@@ -10,7 +10,7 @@ import time
 
 # ------ PARAMETERS -------
 p = Parameters()
-scenario = p.scenario_diamond_size4_nn
+scenario = p.scenario_triangle_size5_nn
 if scenario is not None:
     scenario()
 
@@ -58,7 +58,7 @@ def create_critic(method, nn_dimensions, lr, eligibility_decay, discount_factor)
 
 def run_game_instance(board, actor, critic, remaining_pegs, visualize=False):
     actor.eligibility = {}
-    critic.eligibility = {}
+    critic.eligibility = {} if critic_method == "TL" else []
     action = actor.select_action(board)
     state_and_rewards = []
     state_and_rewards.append((board.board_state(), board.get_reward()))

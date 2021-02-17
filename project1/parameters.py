@@ -48,10 +48,10 @@ class Parameters():
         self.critic_nn_dims = (15, 20, 30, 5, 1)
         self.lr_critic = 0.001
         self.eligibility_decay_critic = 0.95
-        self.discount_factor_critic = 0.9
-        self.lr_actor = 0.15
-        self.eligibility_decay_actor = 0.8
-        self.discount_factor_actor = 0.8
+        self.discount_factor_critic = 0.95
+        self.lr_actor = 0.1
+        self.eligibility_decay_actor = 0.95
+        self.discount_factor_actor = 0.95
         self.epsilon = 0.99
         self.epsilon_decay = 0.95
 
@@ -67,10 +67,10 @@ class Parameters():
         self.critic_nn_dims = (16, 20, 30, 5, 1)
         self.lr_critic = 0.001
         self.eligibility_decay_critic = 0.95
-        self.discount_factor_critic = 0.9
-        self.lr_actor = 0.15
-        self.eligibility_decay_actor = 0.8
-        self.discount_factor_actor = 0.8
+        self.discount_factor_critic = 0.95
+        self.lr_actor = 0.1
+        self.eligibility_decay_actor = 0.95
+        self.discount_factor_actor = 0.95
         self.epsilon = 0.99
         self.epsilon_decay = 0.95
 
