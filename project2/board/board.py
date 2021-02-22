@@ -61,5 +61,5 @@ class Board:
         elif player == 2:
             return self.check_winning_state_player_two()
         elif player == 0:
-            return self.check_winning_state_player_two()
+            return self.check_winning_state_player_one() or self.check_winning_state_player_two()
 
