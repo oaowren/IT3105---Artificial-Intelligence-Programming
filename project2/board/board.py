@@ -19,6 +19,9 @@ class Board:
                 output += " "
         return output
 
+    def flatten_board(self):
+        return self.board.flatten()
+
     def check_winning_state_player_one(self):
         reachable_nodes = []
         for i in range (self.board_size):

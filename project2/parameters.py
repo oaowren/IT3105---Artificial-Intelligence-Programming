@@ -12,7 +12,7 @@ class Parameters():
         self.activation_function = "sigmoid"
         self.optimizer = "adam"
         # TOPP parameters
-        self.number_of_cached_anet = 100
+        self.number_of_cached_anet = 5
         self.number_of_games = 100
 
     

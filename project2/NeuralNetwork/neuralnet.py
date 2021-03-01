@@ -1,4 +1,5 @@
 from tensorflow import keras as ks
+import numpy as np
 
 # Static values used to select activation function
 acts = {
@@ -17,10 +18,13 @@ optimizers = {
 }
 
 class NeuralNet():
-
+    # TODO: add random minibatch from Replay Buffer (RBUF) used to train model
     def __init__(self, nn_dims, board_size, lr, activation, optimizer, load_saved_model=False, model_name="", episode_number=0):
         if load_saved_model:
-            self.model = self.load_saved_model(model_name, episode_number)
+            try:
+                self.model = self.load_saved_model(model_name, episode_number)
+            except OSError:
+                raise ValueError("Failed to load model named {0}{1}, did you provide correct model name and episode numnber?".format(model_name, episode_number))
         else: 
             self.model = self.init_model(nn_dims, board_size, lr, activation, optimizer)
 
@@ -29,7 +33,7 @@ class NeuralNet():
         activation_function = self.select_activation(activation)
         if activation_function is None:
             raise ValueError("Invalid activation function provided (must be either '{0}')".format("', '".join(acts.keys())))
-        model.add(ks.Input(shape=(board_size**2, )))
+        model.add(ks.Input(shape=(board_size**2)))
         model.add(ks.layers.Dense(board_size**2, activation=activation_function))
         for i in nn_dims:
             model.add(ks.layers.Dense(i, activation=activation_function))
@@ -48,6 +52,16 @@ class NeuralNet():
 
     def select_optimizer(self, optimizer):
         return optimizers.get(optimizer, None)
+
+    def fit(self, inputs, targets, epochs=1):
+        self.model.fit(inputs, targets, epochs=epochs)
+
+    def predict(self, inputs, flat_board):
+        predictions = self.model.predict(inputs)
+        pred_length = len(predictions)
+        illegal_moves_removed = np.array([[predictions[n][i] if flat_board[i]==0 else 0 for i in range(len(predictions[n]))] for n in range(pred_length)])
+        illegal_moves_summed = [sum(illegal_moves_removed[i]) for i in range(pred_length)]
+        return illegal_moves_removed / illegal_moves_summed
 
     def save_model(self, model_name, episode_number):
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
