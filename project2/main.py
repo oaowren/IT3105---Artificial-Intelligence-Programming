@@ -7,13 +7,14 @@ import time
 import random
 
 p = Parameters()
+# Initialize save interval, RBUF, ANET and board (state manager)
 save_interval = p.number_of_games//p.number_of_cached_anet
 rbuf = []
+nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
+board = Board(p.board_size)
+board_visualizer = BoardVisualizer()
 
 if __name__ == "__main__":
-    nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
-    board = Board(p.board_size)
-    board_visualizer = BoardVisualizer()
     board.board[0][3] = 1
     board.board[2][0] = 2
     flat_board = board.flatten_board()
