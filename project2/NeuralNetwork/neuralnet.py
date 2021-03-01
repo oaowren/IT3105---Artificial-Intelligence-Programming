@@ -18,7 +18,6 @@ optimizers = {
 }
 
 class NeuralNet():
-    # TODO: add random minibatch from Replay Buffer (RBUF) used to train model
     def __init__(self, nn_dims, board_size, lr, activation, optimizer, load_saved_model=False, model_name="", episode_number=0):
         if load_saved_model:
             try:
@@ -34,9 +33,11 @@ class NeuralNet():
         if activation_function is None:
             raise ValueError("Invalid activation function provided (must be either '{0}')".format("', '".join(acts.keys())))
         model.add(ks.Input(shape=(board_size**2)))
+        # Ensure that input has correct shape
         model.add(ks.layers.Dense(board_size**2, activation=activation_function))
         for i in nn_dims:
             model.add(ks.layers.Dense(i, activation=activation_function))
+        # Ensure that output has correct shape and activation softmax
         model.add(ks.layers.Dense(board_size**2, activation="softmax"))
         o = self.select_optimizer(optimizer)
         if o is None:

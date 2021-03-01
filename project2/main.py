@@ -7,6 +7,8 @@ import time
 import random
 
 p = Parameters()
+save_interval = p.number_of_games//p.number_of_cached_anet
+rbuf = []
 
 if __name__ == "__main__":
     nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
