@@ -24,7 +24,7 @@ class NeuralNet():
             try:
                 self.model = self.load_saved_model(model_name, episode_number)
             except OSError:
-                raise ValueError("Failed to load model named {0}{1}, did you provide correct model name and episode numnber?".format(model_name, episode_number))
+                raise ValueError("Failed to load model named {0}{1}, did you provide correct model name and episode number?".format(model_name, episode_number))
         else: 
             self.model = self.init_model(nn_dims, board_size, lr, activation, optimizer)
 
@@ -53,8 +53,12 @@ class NeuralNet():
     def select_optimizer(self, optimizer):
         return optimizers.get(optimizer, None)
 
-    def fit(self, inputs, targets, epochs=1):
-        self.model.fit(inputs, targets, epochs=epochs)
+    def fit(self, inputs, targets, batch_size=None, epochs=1, verbosity=1):
+        train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
+        train_x, train_y = self.random_minibatch(train_x, train_y, len(train_x))
+        self.model.fit(train_x, train_y, epochs=epochs, verbose=verbosity)
+        self.model.evaluate(valid_x, valid_y, verbose=verbosity)
+            
 
     def predict(self, inputs, flat_board):
         predictions = self.model.predict(inputs)
@@ -71,3 +75,18 @@ class NeuralNet():
         model = ks.models.load_model("project2/models/{0}{1}.h5".format(model_name, episode_number))
         print("Model {0}{1} loaded succesfully".format(model_name, episode_number))
         return model
+
+    def random_minibatch(self, inputs, targets, size=1):
+        indices = np.random.randint(len(inputs), size=size)
+        return inputs[indices], targets[indices]
+
+    def train_test_split(self, inputs, targets, split=0.1, randomize=True):
+        vc = round(split * len(inputs))
+        if split > 0:
+            pairs = list(zip(inputs,targets))
+            if randomize: np.random.shuffle(pairs)
+            vcases = pairs[0:vc]; tcases = pairs[vc:]
+            return np.array([tc[0] for tc in tcases]), np.array([tc[1] for tc in tcases]),\
+                   np.array([vc[0] for vc in vcases]), np.array([vc[1] for vc in vcases])
+        else:
+            return inputs,targets,[],[]
