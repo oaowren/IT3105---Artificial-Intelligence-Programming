@@ -1,5 +1,4 @@
-class Parameters():
-
+class Parameters:
     def __init__(self):
         # Board parameters
         self.board_size = 10
@@ -14,5 +13,3 @@ class Parameters():
         # TOPP parameters
         self.number_of_cached_anet = 5
         self.number_of_games = 100
-
-    

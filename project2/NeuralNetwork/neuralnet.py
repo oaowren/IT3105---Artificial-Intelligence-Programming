@@ -76,7 +76,9 @@ class NeuralNet:
     def fit(self, inputs, targets, batch_size=None, epochs=1, verbosity=1):
         train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
         train_x, train_y = self.random_minibatch(train_x, train_y, len(train_x))
-        self.model.fit(train_x, train_y, epochs=epochs, verbose=verbosity, batch_size=batch_size)
+        self.model.fit(
+            train_x, train_y, epochs=epochs, verbose=verbosity, batch_size=batch_size
+        )
         self.model.evaluate(valid_x, valid_y, verbose=verbosity)
 
     def predict(self, inputs, flat_board):
