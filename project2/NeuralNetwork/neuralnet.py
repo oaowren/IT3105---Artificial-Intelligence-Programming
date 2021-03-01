@@ -93,10 +93,7 @@ class NeuralNet:
                 for n in range(pred_length)
             ]
         )
-        illegal_moves_summed = [
-            sum(illegal_moves_removed[i]) for i in range(pred_length)
-        ]
-        return illegal_moves_removed / illegal_moves_summed
+        return np.array([self.normalize(illegal_moves_removed[i]) for i in range(pred_length)])
 
     def save_model(self, model_name, episode_number):
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
@@ -129,3 +126,8 @@ class NeuralNet:
             )
         else:
             return inputs, targets, [], []
+
+    def normalize(self, arr):
+        # Assumes input of 1d np-array
+        arrsum = sum(arr)
+        return arr/arrsum
