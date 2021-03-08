@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 
 class Board:
@@ -78,3 +79,6 @@ class Board:
                 self.check_winning_state_player_one()
                 or self.check_winning_state_player_two()
             )
+
+    def clone(self):
+        return copy.deepcopy(self)

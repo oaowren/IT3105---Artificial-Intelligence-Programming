@@ -3,7 +3,6 @@ from parameters import Parameters
 from board.board import Board
 from board.board_visualizer import BoardVisualizer
 import numpy as np
-import time
 import random
 
 p = Parameters()
