@@ -1,9 +1,10 @@
 import math
-from BasicClientActorAbs import BasicClientActorAbs
+from .BasicClientActorAbs import BasicClientActorAbs
+
 
 class BasicClientActor(BasicClientActorAbs):
-
-    def __init__(self, IP_address=None, verbose=True):
+    def __init__(self, actor, IP_address=None, verbose=True):
+        self.actor = actor
         self.series_id = -1
         BasicClientActorAbs.__init__(self, IP_address, verbose=verbose)
 
@@ -17,20 +18,15 @@ class BasicClientActor(BasicClientActorAbs):
         then you will see a 2 here throughout the entire series, whereas player 1 will see a 1.
         :return: Your actor's selected action as a tuple (row, column)
         """
-
-        # This is an example player who picks random moves. REMOVE THIS WHEN YOU ADD YOUR OWN CODE !!
-        next_move = tuple(self.pick_random_free_cell(
-            state, size=int(math.sqrt(len(state)-1))))
-        #############################
-        #
-        #
-        # YOUR CODE HERE
-        #
-        # next_move = ???
-        ##############################
+        player = state[0]
+        game_state = state[1:]
+        preds = self.actor.predict([game_state], game_state)
+        next_move = self.actor.best_action(preds)
         return next_move
 
-    def handle_series_start(self, unique_id, series_id, player_map, num_games, game_params):
+    def handle_series_start(
+        self, unique_id, series_id, player_map, num_games, game_params
+    ):
         """
         Set the player_number of our actor, so that we can tell our MCTS which actor we are.
         :param unique_id - integer identifier for the player within the whole tournament database
@@ -80,8 +76,8 @@ class BasicClientActor(BasicClientActorAbs):
         #
         ##############################
         print("Game over, these are the stats:")
-        print('Winner: ' + str(winner))
-        print('End state: ' + str(end_state))
+        print("Winner: " + str(winner))
+        print("End state: " + str(end_state))
 
     def handle_series_over(self, stats):
         """
@@ -130,10 +126,10 @@ class BasicClientActor(BasicClientActorAbs):
         #
         #############################
         print("An illegal action was attempted:")
-        print('State: ' + str(state))
-        print('Action: ' + str(illegal_action))
+        print("State: " + str(state))
+        print("Action: " + str(illegal_action))
 
 
-if __name__ == '__main__':
-    bsa = BasicClientActor(verbose=True)
-    bsa.connect_to_server()
+# if __name__ == "__main__":
+    # bsa = BasicClientActor(verbose=True)
+    # bsa.connect_to_server()

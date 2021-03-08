@@ -12,6 +12,7 @@ class Parameters:
         self.nn_dims = (15, 15, 20, 25, 30, 25, 20, 15)
         self.activation_function = "sigmoid"
         self.optimizer = "adam"
+        self.model_name = ""
         # TOPP parameters
         self.number_of_cached_anet = 5
         self.number_of_games = 100
