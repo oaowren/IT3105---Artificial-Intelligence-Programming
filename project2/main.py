@@ -48,26 +48,28 @@ if __name__ == "__main__":
 
     board.make_move((0,1), 1)
     board.make_move((1,0),1)
-    # flat_board = board.flatten_board()
-    # rando_values = np.array(
-    #     [[random.randint(0, 50) for _ in range(p.board_size ** 2)] for _ in range(50)]
-    # )
-    # rando_targets = np.array(
-    #     [[random.uniform(0, 0.2) for _ in range(p.board_size ** 2)] for _ in range(50)]
-    # )
-    # for i in range(len(rando_values)):
-    #     rbuf.append([rando_values[i], rando_targets[i]])
-    # nn.fit([r[0] for r in rbuf], [NeuralNet.normalize(r[1]) for r in rbuf])
-    # rando_pred = np.array([[random.randint(0, 50) for _ in range(p.board_size ** 2)]])
-    # print(nn.predict(rando_pred, flat_board))
+    flat_board = board.flatten_board()
+    rando_values = np.array(
+        [[random.randint(0, 50) for _ in range(p.board_size ** 2)] for _ in range(50)]
+    )
+    rando_targets = np.array(
+        [[random.uniform(0, 0.2) for _ in range(p.board_size ** 2)] for _ in range(50)]
+    )
+    for i in range(len(rando_values)):
+        rbuf.append([rando_values[i], rando_targets[i]])
+    nn.fit([r[0] for r in rbuf], [NeuralNet.normalize(r[1]) for r in rbuf])
+    rando_pred = np.array([[random.randint(0, 50) for _ in range(p.board_size ** 2)]])
+    preds = nn.predict(rando_pred, flat_board)
+    print(preds)
+    print(nn.best_action(preds))
     # print(board.check_winning_state_player_one())
-    board.make_move((1,1), 1)
-    board.make_move((2,3), 2)
-    board.make_move((2,1), 1)
-    board.make_move((3,1), 2)
-    board.make_move((3,0), 2)
-    board.make_move((3,2), 2)
-    print(board.board)
-    print(board.check_winning_state())
-    board_visualizer.draw_board(board.board)
-    time.sleep(6)
+    # board.make_move((1,1), 1)
+    # board.make_move((2,3), 2)
+    # board.make_move((2,1), 1)
+    # board.make_move((3,1), 2)
+    # board.make_move((3,0), 2)
+    # board.make_move((3,2), 2)
+    # print(board.board)
+    # print(board.check_winning_state())
+    # board_visualizer.draw_board(board.board)
+    # time.sleep(6)

@@ -42,6 +42,7 @@ class NeuralNet:
         else:
             self.model = self.init_model(nn_dims, board_size, lr, activation, optimizer)
         self.topp = load_saved_model
+        self.board_size = board_size
 
     def init_model(self, nn_dims, board_size, lr, activation, optimizer):
         model = ks.Sequential()
@@ -97,6 +98,10 @@ class NeuralNet:
             ]
         )
         return np.array([NeuralNet.normalize(illegal_moves_removed[i]) for i in range(pred_length)])
+
+    def best_action(self, normalized_predictions):
+        i = np.argmax(normalized_predictions)
+        return (i % self.board_size, i//self.board_size)
 
     def save_model(self, model_name, episode_number):
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
