@@ -47,7 +47,8 @@ if __name__ == "__main__":
 
     board.board[0][1] = 1
     board.board[1][0] = 2
-    print(board.get_legal_moves())
+    legal = board.get_legal_moves()
+    print(board.check_legal_move((0,1)))
     # flat_board = board.flatten_board()
     # rando_values = np.array(
     #     [[random.randint(0, 50) for _ in range(p.board_size ** 2)] for _ in range(50)]

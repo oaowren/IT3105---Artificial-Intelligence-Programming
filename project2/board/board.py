@@ -25,6 +25,9 @@ class Board:
         flat_board = self.flatten_board()
         return [(i % self.board_size, i // self.board_size) for i in range(len(flat_board)) if flat_board[i] == 0]
 
+    def check_legal_move(self, move):
+        return self.board[move[0]][move[1]] == 0
+
     def flatten_board(self):
         return self.board.flatten()
 
