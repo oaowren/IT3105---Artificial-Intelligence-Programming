@@ -28,6 +28,13 @@ class Board:
     def check_legal_move(self, move):
         return self.board[move[0]][move[1]] == 0
 
+    def make_move(self, move, player):
+        if not self.check_legal_move(move):
+            raise Exception("Illegal move provided")
+        if player != 1 and player != 2:
+            raise Exception("player must be either 1 or 2")
+        self.board[move[0]][move[1]] = player
+
     def flatten_board(self):
         return self.board.flatten()
 
