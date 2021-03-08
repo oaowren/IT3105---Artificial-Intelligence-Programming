@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pygame
+import pygame.freetype
 
 
 class BoardVisualizer:
@@ -8,40 +9,47 @@ class BoardVisualizer:
         self.height = height
 
     def draw_board(self, board):
-        height = self.height
+        pygame.init()
+        height = self.height - 100
         width = self.width
         horisontal_spacing = find_horisontal_spacing(board, width)
         board = convert_diamond_board_shape(board)
+        GAME_FONT = pygame.freetype.SysFont("Helvetica", 20)
 
         # Create blank screen to be drawn upon
         screen = pygame.display.set_mode((width, height))
         screen.fill((255, 255, 255))
+        GAME_FONT.render_to(screen, (40, 40), "Player 1", (0,0,0))
+        GAME_FONT.render_to(screen, (40, 60), "Player 2", (0,0,0))
+        pygame.draw.circle(screen, (255,0,0),(25, 46), 8)
+        pygame.draw.circle(screen, (0, 0, 255), (25, 66), 8)
 
         for row in range(len(board)):
             horisontal_position = (width / 2) - (
                 (len(board[row]) - 1) * horisontal_spacing
             )
+            circle_size = 200/len(board)
             for col in range(len(board[row])):
                 if board[row][col] == 1:
                     pygame.draw.circle(
                         screen,
                         (255, 0, 0),
                         (horisontal_position, height * ((row + 1) / (len(board) + 1))),
-                        25,
+                        circle_size,
                     )
                 elif board[row][col] == 0:
                     pygame.draw.circle(
                         screen,
                         (0, 0, 0),
                         (horisontal_position, height * ((row + 1) / (len(board) + 1))),
-                        25,
+                        circle_size,
                     )
                 elif board[row][col] == 2:
                     pygame.draw.circle(
                         screen,
-                        (0, 255, 0),
+                        (0, 0, 255),
                         (horisontal_position, height * ((row + 1) / (len(board) + 1))),
-                        25,
+                        circle_size,
                     )
                 else:
                     raise Exception(
