@@ -93,7 +93,7 @@ class NeuralNet:
                 for n in range(pred_length)
             ]
         )
-        return np.array([self.normalize(illegal_moves_removed[i]) for i in range(pred_length)])
+        return np.array([NeuralNet.normalize(illegal_moves_removed[i]) for i in range(pred_length)])
 
     def save_model(self, model_name, episode_number):
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
@@ -106,7 +106,7 @@ class NeuralNet:
         print("Model {0}{1} loaded succesfully".format(model_name, episode_number))
         return model
 
-    def random_minibatch(self, inputs, targets, size=1):
+    def random_minibatch(self, inputs, targets, size=25):
         indices = np.random.randint(len(inputs), size=size)
         return inputs[indices], targets[indices]
 
@@ -127,7 +127,8 @@ class NeuralNet:
         else:
             return inputs, targets, [], []
 
-    def normalize(self, arr):
+    @staticmethod
+    def normalize(arr):
         # Assumes input of 1d np-array
         arrsum = sum(arr)
         return arr/arrsum

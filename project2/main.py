@@ -31,10 +31,10 @@ def run_full_game():
         # Save distribution D of visit counts in MCT
         # rbuf.append(root, D)
         # select move a based on D
-        # Perform a moving board to new state
+        # Perform a, moving board to new state
         # MCT: retain subtree rooted at new state, discard everything else
         # root = new state
-    # nn.fit([r[0] for r in rbuf], [r[1] for r in rbuf]) -> produces minibatches when calling fit
+    # nn.fit([r[0] for r in rbuf], [NeuralNet.normalize(r[1]) for r in rbuf])
 
 
 if __name__ == "__main__":
@@ -45,18 +45,21 @@ if __name__ == "__main__":
             nn.save_model("model", game)
     """
 
-    board.board[0][3] = 1
-    board.board[2][0] = 2
-    flat_board = board.flatten_board()
-    rando_values = np.array(
-        [[random.randint(0, 50) for _ in range(p.board_size ** 2)] for _ in range(50)]
-    )
-    rando_targets = np.array(
-        [[random.uniform(0, 0.2) for _ in range(p.board_size ** 2)] for _ in range(50)]
-    )
-    nn.fit(rando_values, rando_targets, epochs=25, batch_size=10)
-    rando_pred = np.array([[random.randint(0, 50) for _ in range(p.board_size ** 2)]])
-    print(nn.predict(rando_pred, flat_board))
+    board.board[0][1] = 1
+    board.board[1][0] = 2
+    print(board.get_legal_moves())
+    # flat_board = board.flatten_board()
+    # rando_values = np.array(
+    #     [[random.randint(0, 50) for _ in range(p.board_size ** 2)] for _ in range(50)]
+    # )
+    # rando_targets = np.array(
+    #     [[random.uniform(0, 0.2) for _ in range(p.board_size ** 2)] for _ in range(50)]
+    # )
+    # for i in range(len(rando_values)):
+    #     rbuf.append([rando_values[i], rando_targets[i]])
+    # nn.fit([r[0] for r in rbuf], [NeuralNet.normalize(r[1]) for r in rbuf])
+    # rando_pred = np.array([[random.randint(0, 50) for _ in range(p.board_size ** 2)]])
+    # print(nn.predict(rando_pred, flat_board))
     # print(board.check_winning_state_player_one())
     # board.board[1][1] = 1
     # board.board[2][3] = 2

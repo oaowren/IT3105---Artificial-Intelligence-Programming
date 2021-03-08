@@ -1,5 +1,5 @@
 import numpy as np
-import copy
+from copy import deepcopy
 
 
 class Board:
@@ -20,6 +20,10 @@ class Board:
                 output += "1"
                 output += " "
         return output
+
+    def get_legal_moves(self):
+        flat_board = self.flatten_board()
+        return [(i % self.board_size, i // self.board_size) for i in range(len(flat_board)) if flat_board[i] == 0]
 
     def flatten_board(self):
         return self.board.flatten()
@@ -81,4 +85,4 @@ class Board:
             )
 
     def clone(self):
-        return copy.deepcopy(self)
+        return deepcopy(self)
