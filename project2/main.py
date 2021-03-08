@@ -3,6 +3,7 @@ from parameters import Parameters
 from board.board import Board
 from board.board_visualizer import BoardVisualizer
 import numpy as np
+import time
 import random
 
 p = Parameters()
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     # print(board.check_winning_state())
     # board.board[3][0] = 1
     # board.board[3][2] = 2
-    # print(board.board)
-    # print(board.check_winning_state())
-    # board_visualizer.draw_board(board.board)
-    # time.sleep(6)
+    print(board.board)
+    print(board.check_winning_state())
+    board_visualizer.draw_board(board.board)
+    time.sleep(6)
