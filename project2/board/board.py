@@ -26,7 +26,10 @@ class Board:
         return [(i % self.board_size, i // self.board_size) for i in range(len(flat_board)) if flat_board[i] == 0]
 
     def check_legal_move(self, move):
-        return self.board[move[0]][move[1]] == 0
+        try:
+            return self.board[move[0]][move[1]] == 0
+        except IndexError:
+            return False
 
     def make_move(self, move, player):
         if not self.check_legal_move(move):
@@ -65,7 +68,6 @@ class Board:
             if self.board[i][0] == 2:
                 reachable_nodes.append((i, 0))
         for node in reachable_nodes:
-            print(reachable_nodes)
             for n in range(-1, 2):
                 if (
                     0 <= node[0] + n < self.board_size

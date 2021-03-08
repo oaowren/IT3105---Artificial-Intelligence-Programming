@@ -1,7 +1,7 @@
 class Parameters:
     def __init__(self):
         # Board parameters
-        self.board_size = 10
+        self.board_size = 3
         # MCTS parameters
         self.number_of_episodes = 100
         self.number_of_search_episodes = 1000

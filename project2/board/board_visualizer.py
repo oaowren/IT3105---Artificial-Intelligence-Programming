@@ -4,7 +4,7 @@ import pygame.freetype
 
 
 class BoardVisualizer:
-    def __init__(self, width=1000, height=800):
+    def __init__(self, width=800, height=800):
         self.width = width
         self.height = height
 
@@ -23,6 +23,10 @@ class BoardVisualizer:
         GAME_FONT.render_to(screen, (40, 60), "Player 2", (0,0,0))
         pygame.draw.circle(screen, (255,0,0),(25, 46), 8)
         pygame.draw.circle(screen, (0, 0, 255), (25, 66), 8)
+        pygame.draw.line(screen, (0,0,255), (60, 350), (400, 10), 3)
+        pygame.draw.line(screen, (0,0,255), (400, 690), (740, 350), 3)
+        pygame.draw.line(screen, (255,0,0), (400, 10), (740, 350), 3)
+        pygame.draw.line(screen, (255,0,0), (400, 690), (60, 350), 3)
 
         for row in range(len(board)):
             horisontal_position = (width / 2) - (
