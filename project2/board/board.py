@@ -41,6 +41,15 @@ class Board:
     def flatten_board(self):
         return self.board.flatten()
 
+    def get_possible_moves(self):
+        moves = []
+        for i in range(len(self.board)):
+            for n in range(len(self.board)):
+                if self.board[i][n] == 0:
+                    moves.append((i,n))
+        return moves
+
+
     def check_winning_state_player_one(self):
         reachable_nodes = []
         for i in range(self.board_size):
