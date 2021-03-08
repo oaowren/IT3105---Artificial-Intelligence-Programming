@@ -41,6 +41,7 @@ class NeuralNet:
                 )
         else:
             self.model = self.init_model(nn_dims, board_size, lr, activation, optimizer)
+        self.topp = load_saved_model
 
     def init_model(self, nn_dims, board_size, lr, activation, optimizer):
         model = ks.Sequential()
@@ -74,6 +75,8 @@ class NeuralNet:
         return model
 
     def fit(self, inputs, targets, batch_size=None, epochs=1, verbosity=1):
+        if self.topp:
+            raise Exception("Model should not train during TOPP")
         train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
         train_x, train_y = self.random_minibatch(train_x, train_y, len(train_x))
         self.model.fit(
