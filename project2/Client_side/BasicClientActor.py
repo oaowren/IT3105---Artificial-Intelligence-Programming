@@ -18,9 +18,7 @@ class BasicClientActor(BasicClientActorAbs):
         then you will see a 2 here throughout the entire series, whereas player 1 will see a 1.
         :return: Your actor's selected action as a tuple (row, column)
         """
-        player = state[0]
-        game_state = state[1:]
-        preds = self.actor.predict([game_state], game_state)
+        preds = self.actor.predict([state])
         next_move = self.actor.best_action(preds)
         return next_move
 

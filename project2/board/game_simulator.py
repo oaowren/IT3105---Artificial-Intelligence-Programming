@@ -17,7 +17,6 @@ class GameSimulator:
         player = root[0]
         state_split = root[1].split()
         state = [[int(i) for i in state_split[n*self.board_size:(n+1)*self.board_size]] for n in range(self.board_size)]
-        print(state)
         self.player = player
         self.board.board = state
 
@@ -28,6 +27,21 @@ class GameSimulator:
             self.state_action[(self.board.board_state(), self.player)] = next_move
             self.board.make_move(next_move, self.player)
             self.change_player()
+
+    def tree_search(self):
+        # TODO: indicate when a leaf node is reached
+        next_move = self.tree.tree_action(self.board.board_state(), self.player)
+        self.state_action[(self.board.board_state(), self.player)] = next_move
+        self.board.make_move(next_move, self.player)
+        self.change_player()
+
+    def sim_games(self, epsilon, number_of_search_games):
+        for _ in number_of_search_games:
+            self.tree_search()
+            self.rollout_game(epsilon)
+            rewards = {1:self.board.get_reward(1), 2: self.board.get_reward(2)}
+            for key in self.state_action.keys():
+                self.tree.update(key, self.state_action[key], rewards[key[0]])
 
     def reset(self):
         self.board = Board(self.board_size)

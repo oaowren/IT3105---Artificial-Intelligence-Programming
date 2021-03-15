@@ -51,7 +51,6 @@ if __name__ == "__main__":
         if game % save_interval == 0:
             nn.save_model("model", game)
     """
-    # bsa = BasicClientActor(nn, verbose = True)
 
     # board.make_move((0,1), 1)
     # board.make_move((1,0),1)
