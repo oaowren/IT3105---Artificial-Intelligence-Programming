@@ -101,13 +101,13 @@ class NeuralNet:
         return np.array([NeuralNet.normalize(illegal_moves_removed[i]) for i in range(pred_length)])
 
     def best_action(self, normalized_predictions):
-        i = np.argmax(normalized_predictions)
-        return (i % self.board_size, i//self.board_size)
+        i = np.argmax(normalized_predictions[0])
+        return NeuralNet.convert_to_2d_move(i, self.board_size)
 
     def epsilon_best_action(self, normalized_predictions, epsilon):
         if random.random() < epsilon:
-            index = random.choice([i for i in range(len(normalized_predictions)) if normalized_predictions[i] != 0])
-            return (index % self.board_size, index//self.board_size)
+            index = random.choice([i for i in range(len(normalized_predictions[0])) if normalized_predictions[0][i] != 0])
+            return NeuralNet.convert_to_2d_move(index, self.board_size)
         return self.best_action(normalized_predictions)
 
     def save_model(self, model_name, episode_number):
@@ -141,6 +141,10 @@ class NeuralNet:
             )
         else:
             return inputs, targets, [], []
+
+    @staticmethod
+    def convert_to_2d_move(index, board_size):
+        return (index//board_size, index % board_size)
 
     @staticmethod
     def normalize(arr):

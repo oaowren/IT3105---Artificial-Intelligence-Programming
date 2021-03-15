@@ -2,7 +2,9 @@ from NeuralNetwork.neuralnet import NeuralNet
 from parameters import Parameters
 from board.board import Board
 from board.board_visualizer import BoardVisualizer
+from board.game_simulator import GameSimulator
 from Client_side.BasicClientActor import BasicClientActor
+from MCTS.montecarlo import MCTS
 import numpy as np
 import random
 import time
@@ -11,9 +13,12 @@ p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
 save_interval = p.number_of_games // p.number_of_cached_anet
 rbuf = []
-nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer, True, "test", 10)
+nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size)
 board_visualizer = BoardVisualizer()
+tree = MCTS(board.board_state(), nn)
+sim_game = GameSimulator(board, 1, tree)
+
 
 
 def run_search_game():
@@ -46,7 +51,7 @@ if __name__ == "__main__":
         if game % save_interval == 0:
             nn.save_model("model", game)
     """
-    bsa = BasicClientActor(nn, verbose = True)
+    # bsa = BasicClientActor(nn, verbose = True)
 
     # board.make_move((0,1), 1)
     # board.make_move((1,0),1)
@@ -73,5 +78,6 @@ if __name__ == "__main__":
     # board.make_move((3,2), 2)
     # print(board.board)
     # print(board.check_winning_state())
-    # board_visualizer.draw_board(board.board)
-    # time.sleep(6)
+    sim_game.rollout_game(0)
+    board_visualizer.draw_board(sim_game.board.board)
+    time.sleep(6)

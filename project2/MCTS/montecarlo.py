@@ -40,8 +40,8 @@ class MCTS:
         return exploration_bonus
 
     def rollout_action(self, state, epsilon, player):
-        split_state = np.concatenate([player], [int(i) for i in state.split()])
-        preds = self.nn.predict([split_state])
+        split_state = np.concatenate(([player], [int(i) for i in state.split()]))
+        preds = self.nn.predict(np.array([split_state]))
         return self.nn.epsilon_best_action(preds, epsilon)
 
 

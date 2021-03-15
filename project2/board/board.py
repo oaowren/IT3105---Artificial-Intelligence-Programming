@@ -17,9 +17,9 @@ class Board:
         output = ""
         for i in self.board:
             for n in i:
-                if board.board[i][n] == 1:
+                if n == 1:
                     output += "1"
-                elif board.board[i][n] ==2:
+                elif n ==2:
                     output += "2"
                 else:
                     output +="0"
