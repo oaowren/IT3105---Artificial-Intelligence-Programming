@@ -57,7 +57,7 @@ class MCTS:
         legal_moves = board.get_legal_moves()
         self.states[state] = {"N":0, "A": legal_moves, "P": player}
         for move in legal_moves:
-            board_copy = board.copy()
+            board_copy = board.clone()
             board_copy.make_move(move)
             self.state_action[(state, move)] = {"N": 0, "Q": 0, "P": player, "State": board_copy}
 
@@ -65,7 +65,7 @@ class MCTS:
         return "hei"
 
     def traverse(self, board):
-        board_copy = board.copy()
+        board_copy = board.clone()
         traversal_sequence = []
         while not self.board.check_winning_state() and board_copy.get_state() in self.states:
             traversal_sequence.append(board_copy.get_state())
