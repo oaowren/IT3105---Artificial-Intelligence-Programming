@@ -44,6 +44,34 @@ class MCTS:
         preds = self.nn.predict(np.array([split_state]))
         return self.nn.epsilon_best_action(preds, epsilon)
 
+    def expand_tree(self, board, player):
+        state = board.board_state()
+        legal_moves = board.get_legal_moves()
+        self.states[state] = {"N":0, "A": legal_moves, "P": player}
+        for move in legal_moves:
+            board_copy = board.copy()
+            board_copy.make_move(move)
+            self.state_action[(state, move)] = {"N": 0, "Q": 0, "P": player, "State": board_copy}
+
+    def select_action(self, board):
+        return "hei"
+
+    def traverse(self, board):
+        board_copy = board.copy()
+        traversal_sequence = []
+        while not self.board.check_winning_state() and board_copy.get_state() in self.states:
+            traversal_sequence.append(board_copy.get_state())
+            move = select_move
+            board_copy.make_move(move)
+        traversal_sequence.append(board_copy.get_state())
+
+
+
+
+
+
+        
+
 
 
 

@@ -30,7 +30,7 @@ def run_search_game():
 
 def run_full_game():
     board.reset_board()
-    # Initialize MCT to root in same state as board_starting_state
+    mcts = MCTS(root=board.get_state)
     while not board.check_winning_state:
         # Initialize Monte Carlo game board (copy of board) to same state as root
         for search_game in range(p.number_of_search_episodes):
