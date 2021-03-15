@@ -30,7 +30,7 @@ def run_full_game(epsilon, starting_player):
         rbuf[tree.root] = D
         next_move=NeuralNet.convert_to_2d_move(np.argmax(D), p.board_size)
         board.make_move(next_move, player)
-        player = 1 if player == 2 else 2
+        player = player % 2 + 1
         # MCT: retain subtree rooted at new state, discard everything else
         sim.reset()
     nn.fit([np.concatenate((r[0], [int(i) for i in r[1].split()])) for r in rbuf.keys()],\

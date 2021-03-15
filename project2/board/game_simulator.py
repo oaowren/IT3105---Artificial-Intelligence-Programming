@@ -12,7 +12,7 @@ class GameSimulator:
         self.state_action = {}
 
     def change_player(self):
-        self.player = 1 if self.player == 2 else 2
+        self.player = self.player % 2 + 1
 
     def initialize_root(self, root):
         player = root[0]
@@ -30,8 +30,9 @@ class GameSimulator:
 
     def tree_search(self):
         sequence = self.tree.traverse(self.board)
-        for key in sequence.keys():
-            self.state_action[key] = sequence[key]
+        self.player = sequence[-1][0] % 2 + 1 
+        for i in sequence:
+            self.state_action[(i[0],i[1])] = i[2]
 
     def sim_games(self, epsilon, number_of_search_games):
         for _ in number_of_search_games:
