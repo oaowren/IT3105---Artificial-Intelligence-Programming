@@ -12,12 +12,12 @@ import time
 p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
 save_interval = p.number_of_games // p.number_of_cached_anet
-rbuf = []
+rbuf = {}
 nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size)
 board_visualizer = BoardVisualizer()
 tree = MCTS(board.board_state(), nn)
-sim_game = GameSimulator(board, 1, tree)
+sim_game = GameSimulator(p.board_size, 1, tree)
 
 
 
@@ -78,6 +78,7 @@ if __name__ == "__main__":
     # board.make_move((3,2), 2)
     # print(board.board)
     # print(board.check_winning_state())
-    sim_game.rollout_game(0)
+    # sim_game.rollout_game(0)
+    sim_game.initialize_root((1, "0 0 0 1 1 2 2 1 2"))
     board_visualizer.draw_board(sim_game.board.board)
     time.sleep(6)
