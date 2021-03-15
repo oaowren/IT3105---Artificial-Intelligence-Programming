@@ -16,68 +16,31 @@ rbuf = {}
 nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size)
 board_visualizer = BoardVisualizer()
-tree = MCTS(board.board_state(), nn)
-sim_game = GameSimulator(p.board_size, 1, tree)
+tree = MCTS((p.starting_player, board.board_state()), nn)
+sim = GameSimulator(board, p.board_size, 1, tree)
 
 
-
-def run_search_game():
-    pass
-    # Use tree policy to search from root to a leaf, update MC-board with each move
-    # argmax(nn.predict(MC-board.state)) to select rollout actions until a final state F, update MC-board with each move
-    # MCTS backprop from F to root
-
-
-def run_full_game():
+def run_full_game(epsilon, starting_player):
+    player = starting_player
     board.reset_board()
-    mcts = MCTS(root=board.get_state)
     while not board.check_winning_state:
-        # Initialize Monte Carlo game board (copy of board) to same state as root
-        for search_game in range(p.number_of_search_episodes):
-            run_search_game()
-        # Save distribution D of visit counts in MCT
-        # rbuf.append(root, D)
-        # select move a based on D
-        # Perform a, moving board to new state
+        tree.root = board.board_state()
+        sim.initialize_root(tree.root)
+        D = sim.sim_games(epsilon, p.number_of_search_episodes)
+        rbuf[tree.root] = D
+        next_move=NeuralNet.convert_to_2d_move(np.argmax(D), p.board_size)
+        board.make_move(next_move, player)
+        player = 1 if player == 2 else 2
         # MCT: retain subtree rooted at new state, discard everything else
-        # root = new state
-    # nn.fit([r[0] for r in rbuf], [NeuralNet.normalize(r[1]) for r in rbuf])
+        sim.reset()
+    nn.fit([np.concatenate((r[0], [int(i) for i in r[1].split()])) for r in rbuf.keys()],\
+         [NeuralNet.normalize(rbuf[key]) for key in rbuf.keys()])
 
 
 if __name__ == "__main__":
-    """
+    epsilon = p.epsilon
     for game in range(p.number_of_games):
-        run_full_game()
+        run_full_game(epsilon, p.starting_player)
+        epsilon *= p.epsilon_decay
         if game % save_interval == 0:
-            nn.save_model("model", game)
-    """
-
-    # board.make_move((0,1), 1)
-    # board.make_move((1,0),1)
-    # flat_board = board.flatten_board()
-    # rando_values = np.array(
-    #     [[random.randint(0, 50) for _ in range(p.board_size ** 2)] for _ in range(50)]
-    # )
-    # rando_targets = np.array(
-    #     [[random.uniform(0, 0.2) for _ in range(p.board_size ** 2)] for _ in range(50)]
-    # )
-    # for i in range(len(rando_values)):
-    #     rbuf.append([rando_values[i], rando_targets[i]])
-    # nn.fit([r[0] for r in rbuf], [NeuralNet.normalize(r[1]) for r in rbuf])
-    # rando_pred = np.array([[random.randint(0, 50) for _ in range(p.board_size ** 2)]])
-    # preds = nn.predict(rando_pred, flat_board)
-    # print(preds)
-    # print(nn.best_action(preds))
-    # print(board.check_winning_state_player_one())
-    # board.make_move((1,1), 1)
-    # board.make_move((2,3), 2)
-    # board.make_move((2,1), 1)
-    # board.make_move((3,1), 2)
-    # board.make_move((3,0), 2)
-    # board.make_move((3,2), 2)
-    # print(board.board)
-    # print(board.check_winning_state())
-    # sim_game.rollout_game(0)
-    sim_game.initialize_root((1, "0 0 0 1 1 2 2 1 2"))
-    board_visualizer.draw_board(sim_game.board.board)
-    time.sleep(6)
+            nn.save_model(f"{p.board_size}x{p.board_size}_ep", game)

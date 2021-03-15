@@ -2,8 +2,9 @@ from .board import Board
 
 class GameSimulator:
 
-    def __init__(self, board_size, starting_player, tree):
+    def __init__(self, playing_board, board_size, starting_player, tree):
         self.board = Board(board_size)
+        self.playing_board = playing_board
         self.board_size = board_size
         self.starting_player = starting_player
         self.player = starting_player
@@ -24,16 +25,13 @@ class GameSimulator:
     def rollout_game(self, epsilon):
         while not self.board.check_winning_state(0):
             next_move = self.tree.rollout_action(self.board.board_state(), epsilon, self.player)
-            self.state_action[(self.board.board_state(), self.player)] = next_move
             self.board.make_move(next_move, self.player)
             self.change_player()
 
     def tree_search(self):
-        # TODO: indicate when a leaf node is reached
-        next_move = self.tree.tree_action(self.board.board_state(), self.player)
-        self.state_action[(self.board.board_state(), self.player)] = next_move
-        self.board.make_move(next_move, self.player)
-        self.change_player()
+        sequence = self.tree.traverse(self.board)
+        for key in sequence.keys():
+            self.state_action[key] = sequence[key]
 
     def sim_games(self, epsilon, number_of_search_games):
         for _ in number_of_search_games:
@@ -42,6 +40,7 @@ class GameSimulator:
             rewards = {1:self.board.get_reward(1), 2: self.board.get_reward(2)}
             for key in self.state_action.keys():
                 self.tree.update(key, self.state_action[key], rewards[key[0]])
+        return self.tree.get_distribution(self.playing_board)
 
     def reset(self):
         self.board = Board(self.board_size)

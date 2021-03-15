@@ -39,6 +39,14 @@ class MCTS:
         exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state))/self.get_N(state,action))
         return exploration_bonus
 
+    def get_distributon(self, board):
+        moves = board.get_legal_moves()
+        state = board.board_state()
+        dist = []
+        for move in moves:
+            dist.append(self.get_N(state, move))
+        return dist
+
     def rollout_action(self, state, epsilon, player):
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nn.predict(np.array([split_state]))

@@ -28,7 +28,7 @@ class Board:
 
     def get_legal_moves(self):
         flat_board = self.flatten_board()
-        return [(i % self.board_size, i // self.board_size) for i in range(len(flat_board)) if flat_board[i] == 0]
+        return [(i // self.board_size, i % self.board_size) for i in range(len(flat_board)) if flat_board[i] == 0]
 
     def check_legal_move(self, move):
         try:

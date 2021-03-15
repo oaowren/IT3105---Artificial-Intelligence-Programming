@@ -80,7 +80,7 @@ class NeuralNet:
         if self.topp:
             raise Exception("Model should not train during TOPP")
         train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
-        train_x, train_y = self.random_minibatch(train_x, train_y, len(train_x))
+        train_x, train_y = self.random_minibatch(train_x, train_y, 10)
         self.model.fit(
             train_x, train_y, epochs=epochs, verbose=verbosity, batch_size=batch_size
         )
