@@ -1,5 +1,6 @@
 from tensorflow import keras as ks
 import numpy as np
+import random
 
 # Static values used to select activation function
 acts = {
@@ -53,9 +54,9 @@ class NeuralNet:
                     "', '".join(acts.keys())
                 )
             )
-        model.add(ks.Input(shape=(board_size ** 2)))
+        model.add(ks.Input(shape=(board_size ** 2 + 1)))
         # Ensure that input has correct shape
-        model.add(ks.layers.Dense(board_size ** 2, activation=activation_function))
+        model.add(ks.layers.Dense(board_size ** 2 + 1, activation=activation_function))
         for i in nn_dims:
             model.add(ks.layers.Dense(i, activation=activation_function))
         # Ensure that output has correct shape and activation softmax
@@ -85,13 +86,13 @@ class NeuralNet:
         )
         self.model.evaluate(valid_x, valid_y, verbose=verbosity)
 
-    def predict(self, inputs, flat_board):
+    def predict(self, inputs):
         predictions = self.model.predict(inputs)
         pred_length = len(predictions)
         illegal_moves_removed = np.array(
             [
                 [
-                    predictions[n][i] if flat_board[i] == 0 else 0
+                    predictions[n][i] if inputs[0][i+1] == 0 else 0
                     for i in range(len(predictions[n]))
                 ]
                 for n in range(pred_length)
@@ -102,6 +103,12 @@ class NeuralNet:
     def best_action(self, normalized_predictions):
         i = np.argmax(normalized_predictions)
         return (i % self.board_size, i//self.board_size)
+
+    def epsilon_best_action(self, normalized_predictions, epsilon):
+        if random.random() < epsilon:
+            index = random.choice([i for i in range(len(normalized_predictions)) if normalized_predictions[i] != 0])
+            return (index % self.board_size, index//self.board_size)
+        return self.best_action(normalized_predictions)
 
     def save_model(self, model_name, episode_number):
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))

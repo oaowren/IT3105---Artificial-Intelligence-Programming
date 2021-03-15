@@ -9,13 +9,13 @@ import numpy as np
 
 class MCTS:
 
-    def __init__(self, root):
+    def __init__(self, root, nn):
         self.root = root
         self.tree_policy = {}
         self.states= {}
         self.state_action = {}
         self.c = 1
-        pass
+        self.nn = nn
 
     def update(self, state, action, reward):
         self.state[state]["N"] +=1
@@ -37,6 +37,12 @@ class MCTS:
 
     def exploration_bonus(self, state, action):
         exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state))/self.get_N(state,action))
+        return exploration_bonus
+
+    def rollout_action(self, state, epsilon, player):
+        split_state = np.concatenate([player], [int(i) for i in state.split()])
+        preds = self.nn.predict([split_state])
+        return self.nn.epsilon_best_action(preds, epsilon)
 
 
 
