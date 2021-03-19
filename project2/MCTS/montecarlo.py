@@ -19,21 +19,21 @@ class MCTS:
 
     def update(self, state, action, reward):
         self.state[state]["N"] +=1
-        self.state_action_pair[(state,action)]["N"] +=1
-        self.state_action_pair[(state,action)]["Q"] += (reward - self.get_Q(state, action))/self.get_N(state, action)
+        self.state_action[(state,action)]["N"] +=1
+        self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/self.get_N(state, action)
         return
 
     def get_N(self, state, action=None):
         if action:
-            if (state,action) not in self.state_action_pairs:
-                self.state_action_pair[(state,action)]["N"] = 0
-            return self.state_action_pair[(state,action)]["N"]
+            if (state,action) not in self.state_action:
+                self.state_action[(state,action)]["N"] = 0
+            return self.state_action[(state,action)]["N"]
         if state not in self.state:
             self.state[state]["N"] = 0
         return self.state[state]["N"]
 
     def get_Q(self, state, action):
-        return self.state_Action_pair[(state,action)]["Q"]
+        return self.state_action[(state,action)]["Q"]
 
     def exploration_bonus(self, state, action):
         exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state))/self.get_N(state,action))
@@ -61,25 +61,30 @@ class MCTS:
             board_copy.make_move(move)
             self.state_action[(state, move)] = {"N": 0, "Q": 0, "P": player, "State": board_copy}
 
-    def select_action(self, board):
-        return "hei"
+    def select_action(self, board, player):
+        #Get max value for player 1, and min value for player 2
+        state = board.get_state()
+        moves = board.get_legal_moves()
+        if(player == 1):
+            values = [self.get_max_action_value(board, move) for move in moves]
+            index = values.index(max(values))
+        else:
+            values = [self.get_min_action_value(board, move) for move in moves]
+            index = values.index(min(values))
+        return moves[index]
 
-    def traverse(self, board):
-        board_copy = board.clone()
+    def get_max_value_move(self, board, move):
+        return self.get_Q(state, move) + self.exploration_bonus(board, move)
+
+    def get_min_value_move(self, board, move):
+        return self.get_Q(state, move) - self.exploration_bonus(board, move)
+
+    def traverse(self, board, player):
         traversal_sequence = []
-        while not self.board.check_winning_state() and board_copy.get_state() in self.states:
-            traversal_sequence.append(board_copy.get_state())
-            move = select_move
-            board_copy.make_move(move)
+        while not self.board.check_winning_state() and board.get_state() in self.states:
+            move = select_move(board, player)
+            traversal_sequence.append((player, board.board_state(), move))
+            board.make_move(move)
+            player = player % 2 + 1 
         traversal_sequence.append(board_copy.get_state())
-
-
-
-
-
-
-        
-
-
-
 
