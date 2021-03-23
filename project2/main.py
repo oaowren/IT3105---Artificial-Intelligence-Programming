@@ -25,12 +25,18 @@ def run_full_game(epsilon):
         sim.initialize_root(tree.root, board.player)
         D = sim.sim_games(epsilon, p.number_of_search_episodes)
         rbuf[tree.root] = D
+        print(board.board)
+        print(D)
         next_move=NeuralNet.convert_to_2d_move(np.argmax(D), p.board_size)
         board.make_move(next_move)
         sim.reset()
     print(rbuf)
     nn.fit([np.concatenate((r[0], [int(i) for i in r[1].split()])) for r in rbuf.keys()],\
          [NeuralNet.normalize(rbuf[key]) for key in rbuf.keys()])
+
+def get_best_move_from_D(D):
+    #TODO: Not complete
+    return D
 
 
 if __name__ == "__main__":

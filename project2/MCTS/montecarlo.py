@@ -18,7 +18,7 @@ class MCTS:
         self.nn = nn
 
     def update(self, state, action, reward):
-        self.state[state]["N"] +=1
+        self.states[state]["N"] +=1
         self.state_action[(state,action)]["N"] +=1
         self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/self.get_N(state, action)
         return
@@ -29,9 +29,9 @@ class MCTS:
                 print(self.state_action)
                 self.state_action[(state,action)]["N"] = 0
             return self.state_action[(state,action)]["N"]
-        if state not in self.state:
-            self.state[state]["N"] = 0
-        return self.state[state]["N"]
+        if state not in self.states:
+            self.states[state]["N"] = 0
+        return self.states[state]["N"]
 
     def get_Q(self, state, action):
         return self.state_action[(state,action)]["Q"]
@@ -45,7 +45,7 @@ class MCTS:
         state = board.get_state()
         dist = []
         for move in moves:
-            dist.append(self.get_N(state, move))
+            dist.append(move, (self.get_N(state, move)))
         return dist
 
     def rollout_action(self, state, epsilon, player):

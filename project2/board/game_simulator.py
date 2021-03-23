@@ -1,4 +1,5 @@
 from .board import Board
+import numpy as np
 
 class GameSimulator:
 
@@ -13,7 +14,7 @@ class GameSimulator:
     def initialize_root(self, state, player):
         player = player
         state_split = state.split()
-        state = [[int(i) for i in state_split[n*self.board_size:(n+1)*self.board_size]] for n in range(self.board_size)]
+        state = np.array([[int(i) for i in state_split[n*self.board_size:(n+1)*self.board_size]] for n in range(self.board_size)])
         self.board.player = player
         self.board.board = state
 
@@ -33,12 +34,12 @@ class GameSimulator:
     def sim_games(self, epsilon, number_of_search_games):
         board_copy = self.board.clone()
         for _ in range(number_of_search_games):
-            self.tree.expand_tree(self.board, self.player)
-            self.tree_search()
-            self.rollout_game(epsilon)
+            self.tree.expand_tree(board_copy, board_copy.player)
+            self.tree_search(board_copy)
+            self.rollout_game(epsilon, board_copy)
             rewards = {1:self.board.get_reward(1), 2: self.board.get_reward(2)}
             for key in self.state_action.keys():
-                self.tree.update(key, self.state_action[key], rewards[key[0]])
+                self.tree.update(key[1], self.state_action[key], rewards[key[0]])
             board_copy = self.board.clone()
         return self.tree.get_distribution(self.playing_board)
 
