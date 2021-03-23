@@ -24,19 +24,24 @@ def run_full_game(epsilon):
         tree.root = board.get_state()
         sim.initialize_root(tree.root, board.player)
         D = sim.sim_games(epsilon, p.number_of_search_episodes)
-        rbuf[tree.root] = D
+        rbuf[str(board.player) + " " + tree.root] = D
+        next_move = get_best_move_from_D(D)
+        print(next_move)
         print(board.board)
-        print(D)
-        next_move=NeuralNet.convert_to_2d_move(np.argmax(D), p.board_size)
         board.make_move(next_move)
         sim.reset()
     print(rbuf)
-    nn.fit([np.concatenate((r[0], [int(i) for i in r[1].split()])) for r in rbuf.keys()],\
-         [NeuralNet.normalize(rbuf[key]) for key in rbuf.keys()])
+    nn.fit([[int(i) for i in r.split()] for r in rbuf.keys()],\
+         [NeuralNet.normalize([i[1] for i in rbuf[key]]) for key in rbuf.keys()])
 
 def get_best_move_from_D(D):
-    #TODO: Not complete
-    return D
+    best_move = None
+    most_visits = -1
+    for d in D:
+        if (d[1] > most_visits):
+            best_move = d[0]
+            most_visits = d[1]
+    return best_move
 
 
 if __name__ == "__main__":

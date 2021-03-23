@@ -1,4 +1,4 @@
-
+from NeuralNetwork.neuralnet import NeuralNet
 """
 Dette er hovedsaklig basert på algoritmen fra
 http://www.cs.cornell.edu/courses/cs6700/2016sp/lectures/CS6700-UCT.pdf
@@ -41,11 +41,11 @@ class MCTS:
         return exploration_bonus
 
     def get_distribution(self, board):
-        moves = board.get_legal_moves()
+        moves = [NeuralNet.convert_to_2d_move(i, board.board_size) for i in range(board.board_size)]
         state = board.get_state()
         dist = []
         for move in moves:
-            dist.append(move, (self.get_N(state, move)))
+            dist.append((move, self.get_N(state, move)))
         return dist
 
     def rollout_action(self, state, epsilon, player):
