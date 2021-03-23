@@ -22,28 +22,25 @@ optimizers = {
 class NeuralNet:
     def __init__(
         self,
-        nn_dims,
-        board_size,
-        lr,
-        activation,
-        optimizer,
+        nn_dims = (10),
+        board_size = 3,
+        lr = 0.01,
+        activation = "sigmoid",
+        optimizer  = "adam",
         load_saved_model=False,
-        model_name="",
         episode_number=0,
     ):
+        self.board_size = board_size
         if load_saved_model:
             try:
-                self.model = self.load_saved_model(model_name, episode_number)
+                self.model = self.load_saved_model(episode_number)
             except OSError:
                 raise ValueError(
-                    "Failed to load model named {0}{1}, did you provide correct model name and episode number?".format(
-                        model_name, episode_number
-                    )
+                    "Failed to load model named {0}{1}, did you provide episode number?".format(f"{self.board_size}x{self.board_size}_ep", episode_number)
                 )
         else:
             self.model = self.init_model(nn_dims, board_size, lr, activation, optimizer)
         self.topp = load_saved_model
-        self.board_size = board_size
 
     def init_model(self, nn_dims, board_size, lr, activation, optimizer):
         model = ks.Sequential()
@@ -76,7 +73,7 @@ class NeuralNet:
         model.summary()
         return model
 
-    def fit(self, inputs, targets, batch_size=None, epochs=1, verbosity=1):
+    def fit(self, inputs, targets, batch_size=None, epochs=1, verbosity=0):
         if self.topp:
             raise Exception("Model should not train during TOPP")
         train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
@@ -84,7 +81,8 @@ class NeuralNet:
         self.model.fit(
             train_x, train_y, epochs=epochs, verbose=verbosity, batch_size=batch_size
         )
-        self.model.evaluate(valid_x, valid_y, verbose=verbosity)
+        e = self.model.evaluate(valid_x, valid_y, verbose=verbosity)
+        print(format('Loss: %.2f\tAccuracy: %.2f' % (e[0], e[1])))
 
     def predict(self, inputs):
         predictions = self.model.predict(inputs)
@@ -114,14 +112,14 @@ class NeuralNet:
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
         print("Model {0}{1} saved succesfully".format(model_name, episode_number))
 
-    def load_saved_model(self, model_name, episode_number):
+    def load_saved_model(self, episode_number):
         model = ks.models.load_model(
-            "project2/models/{0}{1}.h5".format(model_name, episode_number)
+            "project2/models/{0}{1}.h5".format(f"{self.board_size}x{self.board_size}_ep", episode_number)
         )
-        print("Model {0}{1} loaded succesfully".format(model_name, episode_number))
+        print("Model {0}{1} loaded succesfully".format(f"{self.board_size}x{self.board_size}_ep", episode_number))
         return model
 
-    def random_minibatch(self, inputs, targets, size=1):
+    def random_minibatch(self, inputs, targets, size=10):
         indices = np.random.randint(len(inputs), size=size)
         return inputs[indices], targets[indices]
 

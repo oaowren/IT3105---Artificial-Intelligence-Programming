@@ -20,7 +20,7 @@ class MCTS:
     def update(self, state, action, reward):
         self.states[state]["N"] +=1
         self.state_action[(state,action)]["N"] +=1
-        self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/self.get_N(state, action)
+        self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/(1 + self.get_N(state, action))
         return
 
     def get_N(self, state, action=None):
@@ -36,7 +36,7 @@ class MCTS:
         return self.state_action[(state,action)]["Q"]
 
     def exploration_bonus(self, state, action):
-        exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state))/self.get_N(state,action))
+        exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state) + 1)/(1 + self.get_N(state,action)))
         return exploration_bonus
 
     def get_distribution(self, board):

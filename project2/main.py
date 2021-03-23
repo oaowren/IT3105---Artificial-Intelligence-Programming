@@ -6,6 +6,7 @@ from board.game_simulator import GameSimulator
 from Client_side.BasicClientActor import BasicClientActor
 from MCTS.montecarlo import MCTS
 import numpy as np
+import time
 
 p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
@@ -16,6 +17,7 @@ board = Board(p.board_size, p.starting_player)
 board_visualizer = BoardVisualizer()
 tree = MCTS((p.starting_player, board.get_state()), nn)
 sim = GameSimulator(board, p.board_size, p.starting_player, tree)
+topp = p.topp
 
 
 def run_full_game(epsilon):
@@ -28,7 +30,6 @@ def run_full_game(epsilon):
         next_move = get_best_move_from_D(D)
         board.make_move(next_move)
         sim.reset()
-    print(rbuf)
     nn.fit([[int(i) for i in r.split()] for r in rbuf.keys()],\
          [NeuralNet.normalize(np.array([i[1] for i in rbuf[key]])) for key in rbuf.keys()])
 
@@ -41,11 +42,39 @@ def get_best_move_from_D(D):
             most_visits = d[1]
     return best_move
 
+def run_topp_game(actor1, actor2, starting_player, visualize=True):
+    player_no = starting_player
+    player = actor1 if player_no == 1 else actor2
+    if visualize:
+        board_visualizer.draw_board(board.board)
+        time.sleep(1)
+    while not board.check_winning_state():
+        split_state = np.concatenate(([player_no], [int(i) for i in board.get_state().split()]))
+        preds = actor1.predict(np.array([split_state]))
+        move = player.best_action(preds)
+        board.make_move(move)
+        player_no = player_no % 2 + 1
+        player = player = actor1 if player_no == 1 else actor2
+        if visualize:
+            board_visualizer.draw_board(board.board)
+            time.sleep(1)
+    winning_player = 1 if board.check_winning_state_player_one() else 2
+    print(f'Player {winning_player} wins!')
+    if visualize:
+        board_visualizer.draw_board(board.board)
+        time.sleep(1)
+
 
 if __name__ == "__main__":
-    epsilon = p.epsilon
-    for game in range(p.number_of_games):
-        run_full_game(epsilon)
-        epsilon *= p.epsilon_decay
-        if game % save_interval == 0:
-            nn.save_model(f"{p.board_size}x{p.board_size}_ep", game)
+    if (p.topp):
+        actor1 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=0)
+        actor2 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=40)
+        run_topp_game(actor1, actor2, 1)
+    else:
+        epsilon = p.epsilon
+        for game in range(p.number_of_games):
+            run_full_game(epsilon)
+            print("Game no. " + str(game+1))
+            epsilon *= p.epsilon_decay
+            if game % save_interval == 0:
+                nn.save_model(f"{p.board_size}x{p.board_size}_ep", game)

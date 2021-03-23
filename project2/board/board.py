@@ -105,7 +105,7 @@ class Board:
 
     def get_reward(self, player):
         if (player == 1 and self.check_winning_state_player_one()) \
-            or (player==2 and self.check_winning_state_player_two()):
+            or (player == 2 and self.check_winning_state_player_two()):
             return 1
         else:
             return -1

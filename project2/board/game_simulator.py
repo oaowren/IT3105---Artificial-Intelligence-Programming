@@ -37,7 +37,7 @@ class GameSimulator:
         for _ in range(number_of_search_games):
             self.tree_search(board_copy)
             self.rollout_game(epsilon, board_copy)
-            rewards = {1:self.board.get_reward(1), 2: self.board.get_reward(2)}
+            rewards = {1:board_copy.get_reward(1), 2: board_copy.get_reward(2)}
             for key in self.state_action.keys():
                 self.tree.update(key[1], self.state_action[key], rewards[key[0]])
             board_copy = self.board.clone()
