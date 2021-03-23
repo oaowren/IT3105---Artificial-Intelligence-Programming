@@ -26,6 +26,7 @@ class MCTS:
     def get_N(self, state, action=None):
         if action:
             if (state,action) not in self.state_action:
+                print(self.state_action)
                 self.state_action[(state,action)]["N"] = 0
             return self.state_action[(state,action)]["N"]
         if state not in self.state:
