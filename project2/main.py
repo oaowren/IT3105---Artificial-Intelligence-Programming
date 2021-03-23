@@ -67,8 +67,8 @@ def run_topp_game(actor1, actor2, starting_player, visualize=True):
 
 if __name__ == "__main__":
     if (p.topp):
-        actor1 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=0)
-        actor2 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=40)
+        actor1 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=p.actor1_episode)
+        actor2 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=p.actor2_episode)
         run_topp_game(actor1, actor2, 1)
     else:
         epsilon = p.epsilon

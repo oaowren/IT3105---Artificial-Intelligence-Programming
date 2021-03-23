@@ -1,7 +1,7 @@
 class Parameters:
     def __init__(self):
         # Board parameters
-        self.board_size = 3
+        self.board_size = 6
         self.starting_player = 1
         # MCTS parameters
         self.number_of_games = 100
@@ -15,4 +15,6 @@ class Parameters:
         self.optimizer = "adam"
         # TOPP parameters
         self.number_of_cached_anet = 5
-        self.topp = True
+        self.topp = False
+        self.actor1_episode = 0
+        self.actor2_episode = 40
