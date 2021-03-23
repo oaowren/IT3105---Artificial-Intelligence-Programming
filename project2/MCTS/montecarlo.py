@@ -86,5 +86,7 @@ class MCTS:
             traversal_sequence.append((player, board.get_state(), move))
             board.make_move(move)
             player = player % 2 + 1 
-        traversal_sequence.append(board.get_state())
+        print("seq")
+        print(traversal_sequence)
+        return traversal_sequence
 

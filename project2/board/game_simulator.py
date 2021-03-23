@@ -26,12 +26,15 @@ class GameSimulator:
 
     def rollout_game(self, epsilon):
         while not self.board.check_winning_state(0):
-            next_move = self.tree.rollout_action(self.board.board_state(), epsilon, self.player)
+            next_move = self.tree.rollout_action(self.board.get_state(), epsilon, self.player)
             self.board.make_move(next_move, self.player)
             self.change_player()
 
     def tree_search(self):
         sequence = self.tree.traverse(self.board, self.player)
+        print(sequence)
+        if not sequence:
+            return
         self.player = sequence[-1][0] % 2 + 1 
         for i in sequence:
             self.state_action[(i[0],i[1])] = i[2]
