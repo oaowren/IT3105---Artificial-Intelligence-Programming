@@ -26,8 +26,7 @@ class MCTS:
     def get_N(self, state, action=None):
         if action:
             if (state,action) not in self.state_action:
-                print(self.state_action)
-                self.state_action[(state,action)]["N"] = 0
+                self.state_action[(state, action)] = {"N": 0, "Q": 0}
             return self.state_action[(state,action)]["N"]
         if state not in self.states:
             self.states[state]["N"] = 0
@@ -41,7 +40,7 @@ class MCTS:
         return exploration_bonus
 
     def get_distribution(self, board):
-        moves = [NeuralNet.convert_to_2d_move(i, board.board_size) for i in range(board.board_size)]
+        moves = [NeuralNet.convert_to_2d_move(i, board.board_size) for i in range(board.board_size ** 2)]
         state = board.get_state()
         dist = []
         for move in moves:
@@ -60,7 +59,7 @@ class MCTS:
         for move in legal_moves:
             board_copy = board.clone()
             board_copy.make_move(move)
-            self.state_action[(state, move)] = {"N": 0, "Q": 0, "P": player, "State": board_copy}
+            self.state_action[(state, move)] = {"N": 0, "Q": 0}
 
     def select_action(self, board, player):
         #Get max value for player 1, and min value for player 2

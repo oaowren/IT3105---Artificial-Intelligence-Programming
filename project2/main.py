@@ -26,13 +26,11 @@ def run_full_game(epsilon):
         D = sim.sim_games(epsilon, p.number_of_search_episodes)
         rbuf[str(board.player) + " " + tree.root] = D
         next_move = get_best_move_from_D(D)
-        print(next_move)
-        print(board.board)
         board.make_move(next_move)
         sim.reset()
     print(rbuf)
     nn.fit([[int(i) for i in r.split()] for r in rbuf.keys()],\
-         [NeuralNet.normalize([i[1] for i in rbuf[key]]) for key in rbuf.keys()])
+         [NeuralNet.normalize(np.array([i[1] for i in rbuf[key]])) for key in rbuf.keys()])
 
 def get_best_move_from_D(D):
     best_move = None
