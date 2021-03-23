@@ -21,11 +21,11 @@ class GameSimulator:
 
     def rollout_game(self, epsilon, board_copy):
         while not board_copy.check_winning_state():
-            next_move = self.tree.rollout_action(board_copy.get_state(), epsilon, self.board.player)
+            next_move = self.tree.rollout_action(board_copy.get_state(), epsilon, board_copy.player)
             board_copy.make_move(next_move)
 
     def tree_search(self, board_copy):
-        sequence = self.tree.traverse(board_copy, self.board.player)
+        sequence = self.tree.traverse(board_copy, board_copy.player)
         if not sequence:
             return
         for i in sequence:
@@ -41,6 +41,7 @@ class GameSimulator:
             for key in self.state_action.keys():
                 self.tree.update(key[1], self.state_action[key], rewards[key[0]])
             board_copy = self.board.clone()
+        self.tree.memoized_preds = {}
         return self.tree.get_distribution(self.playing_board)
 
     def reset(self):

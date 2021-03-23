@@ -16,6 +16,7 @@ class MCTS:
         self.state_action = {}
         self.c = 1
         self.nn = nn
+        self.memoized_preds = {}
 
     def update(self, state, action, reward):
         self.states[state]["N"] +=1
@@ -48,8 +49,11 @@ class MCTS:
         return dist
 
     def rollout_action(self, state, epsilon, player):
+        if (player, state) in self.memoized_preds:
+            return self.nn.epsilon_best_action(self.memoized_preds[(player,state)], epsilon)
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nn.predict(np.array([split_state]))
+        self.memoized_preds[(player, state)] = preds
         return self.nn.epsilon_best_action(preds, epsilon)
 
     def expand_tree(self, board, player):

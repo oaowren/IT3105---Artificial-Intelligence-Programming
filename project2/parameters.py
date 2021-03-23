@@ -1,7 +1,7 @@
 class Parameters:
     def __init__(self):
         # Board parameters
-        self.board_size = 6
+        self.board_size = 4
         self.starting_player = 1
         # MCTS parameters
         self.number_of_games = 100
