@@ -106,8 +106,8 @@ class NeuralNet:
 
     def epsilon_best_action(self, normalized_predictions, epsilon):
         if random.random() < epsilon:
-            index = random.choice([i for i in range(len(normalized_predictions[0])) if normalized_predictions[0][i] != 0])
-            return NeuralNet.convert_to_2d_move(index, self.board_size)
+            move = random.choice([NeuralNet.convert_to_2d_move(i, self.board_size) for i in range(len(normalized_predictions[0])) if normalized_predictions[0][i] != 0])
+            return move
         return self.best_action(normalized_predictions)
 
     def save_model(self, model_name, episode_number):

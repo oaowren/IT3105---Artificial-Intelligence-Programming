@@ -50,7 +50,6 @@ class MCTS:
     def rollout_action(self, state, epsilon, player):
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nn.predict(np.array([split_state]))
-        print(preds)
         return self.nn.epsilon_best_action(preds, epsilon)
 
     def expand_tree(self, board, player):
@@ -86,7 +85,5 @@ class MCTS:
             move = self.select_action(board, player)
             traversal_sequence.append((player, board.get_state(), move))
             board.make_move(move)
-        print("seq")
-        print(traversal_sequence)
         return traversal_sequence
 

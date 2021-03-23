@@ -12,7 +12,6 @@ class GameSimulator:
     def initialize_root(self, state, player):
         player = player
         state_split = state.split()
-        print(state_split)
         state = [[int(i) for i in state_split[n*self.board_size:(n+1)*self.board_size]] for n in range(self.board_size)]
         self.board.player = player
         self.board.board = state
@@ -21,11 +20,10 @@ class GameSimulator:
     def rollout_game(self, epsilon, board_copy):
         while not board_copy.check_winning_state():
             next_move = self.tree.rollout_action(board_copy.get_state(), epsilon, self.board.player)
-            self.board.make_move(next_move)
+            board_copy.make_move(next_move)
 
     def tree_search(self, board_copy):
         sequence = self.tree.traverse(board_copy, self.board.player)
-        print(sequence)
         if not sequence:
             return
         for i in sequence:
