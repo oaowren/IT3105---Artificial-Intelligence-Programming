@@ -13,7 +13,7 @@ class Board:
             [[0 for i in range(self.board_size)] for j in range(self.board_size)]
         )
 
-    def board_state(self):
+    def get_state(self):
         output = ""
         for i in self.board:
             for n in i:

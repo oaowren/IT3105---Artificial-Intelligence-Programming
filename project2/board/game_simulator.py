@@ -1,4 +1,5 @@
 from .board import Board
+from copy import deepcopy
 
 class GameSimulator:
 
@@ -14,9 +15,10 @@ class GameSimulator:
     def change_player(self):
         self.player = self.player % 2 + 1
 
-    def initialize_root(self, root):
-        player = root[0]
-        state_split = root[1].split()
+    def initialize_root(self, state, player):
+        player = player
+        state_split = state.split()
+        print(state_split)
         state = [[int(i) for i in state_split[n*self.board_size:(n+1)*self.board_size]] for n in range(self.board_size)]
         self.player = player
         self.board.board = state
@@ -29,13 +31,13 @@ class GameSimulator:
             self.change_player()
 
     def tree_search(self):
-        sequence = self.tree.traverse(self.board)
+        sequence = self.tree.traverse(self.board, self.player)
         self.player = sequence[-1][0] % 2 + 1 
         for i in sequence:
             self.state_action[(i[0],i[1])] = i[2]
 
     def sim_games(self, epsilon, number_of_search_games):
-        for _ in number_of_search_games:
+        for _ in range(number_of_search_games):
             self.tree_search()
             self.rollout_game(epsilon)
             rewards = {1:self.board.get_reward(1), 2: self.board.get_reward(2)}

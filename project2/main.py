@@ -6,8 +6,6 @@ from board.game_simulator import GameSimulator
 from Client_side.BasicClientActor import BasicClientActor
 from MCTS.montecarlo import MCTS
 import numpy as np
-import random
-import time
 
 p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
@@ -16,23 +14,23 @@ rbuf = {}
 nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size)
 board_visualizer = BoardVisualizer()
-tree = MCTS((p.starting_player, board.board_state()), nn)
+tree = MCTS((p.starting_player, board.get_state()), nn)
 sim = GameSimulator(board, p.board_size, 1, tree)
 
 
 def run_full_game(epsilon, starting_player):
     player = starting_player
     board.reset_board()
-    while not board.check_winning_state:
-        tree.root = board.board_state()
-        sim.initialize_root(tree.root)
+    while not board.check_winning_state():
+        tree.root = board.get_state()
+        sim.initialize_root(tree.root, player)
         D = sim.sim_games(epsilon, p.number_of_search_episodes)
         rbuf[tree.root] = D
         next_move=NeuralNet.convert_to_2d_move(np.argmax(D), p.board_size)
         board.make_move(next_move, player)
         player = player % 2 + 1
-        # MCT: retain subtree rooted at new state, discard everything else
         sim.reset()
+    print(rbuf)
     nn.fit([np.concatenate((r[0], [int(i) for i in r[1].split()])) for r in rbuf.keys()],\
          [NeuralNet.normalize(rbuf[key]) for key in rbuf.keys()])
 

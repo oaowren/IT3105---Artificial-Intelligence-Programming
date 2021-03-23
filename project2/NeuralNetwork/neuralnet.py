@@ -121,7 +121,7 @@ class NeuralNet:
         print("Model {0}{1} loaded succesfully".format(model_name, episode_number))
         return model
 
-    def random_minibatch(self, inputs, targets, size=25):
+    def random_minibatch(self, inputs, targets, size=1):
         indices = np.random.randint(len(inputs), size=size)
         return inputs[indices], targets[indices]
 

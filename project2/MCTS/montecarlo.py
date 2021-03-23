@@ -41,7 +41,7 @@ class MCTS:
 
     def get_distributon(self, board):
         moves = board.get_legal_moves()
-        state = board.board_state()
+        state = board.get_state()
         dist = []
         for move in moves:
             dist.append(self.get_N(state, move))
@@ -53,7 +53,7 @@ class MCTS:
         return self.nn.epsilon_best_action(preds, epsilon)
 
     def expand_tree(self, board, player):
-        state = board.board_state()
+        state = board.get_state()
         legal_moves = board.get_legal_moves()
         self.states[state] = {"N":0, "A": legal_moves, "P": player}
         for move in legal_moves:
@@ -66,25 +66,25 @@ class MCTS:
         state = board.get_state()
         moves = board.get_legal_moves()
         if(player == 1):
-            values = [self.get_max_action_value(board, move) for move in moves]
+            values = [self.get_max_value_move(state, move) for move in moves]
             index = values.index(max(values))
         else:
-            values = [self.get_min_action_value(board, move) for move in moves]
+            values = [self.get_min_value_move(state, move) for move in moves]
             index = values.index(min(values))
         return moves[index]
 
     def get_max_value_move(self, board, move):
-        return self.get_Q(state, move) + self.exploration_bonus(board, move)
+        return self.get_Q(board, move) + self.exploration_bonus(board, move)
 
     def get_min_value_move(self, board, move):
-        return self.get_Q(state, move) - self.exploration_bonus(board, move)
+        return self.get_Q(board, move) - self.exploration_bonus(board, move)
 
     def traverse(self, board, player):
         traversal_sequence = []
-        while not self.board.check_winning_state() and board.get_state() in self.states:
-            move = select_move(board, player)
-            traversal_sequence.append((player, board.board_state(), move))
+        while not board.check_winning_state() and board.get_state() in self.states:
+            move = self.select_action(board, player)
+            traversal_sequence.append((player, board.get_state(), move))
             board.make_move(move)
             player = player % 2 + 1 
-        traversal_sequence.append(board_copy.get_state())
+        traversal_sequence.append(board.get_state())
 
