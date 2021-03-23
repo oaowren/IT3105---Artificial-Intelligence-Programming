@@ -3,10 +3,11 @@ from copy import deepcopy
 
 
 class Board:
-    def __init__(self, board_size):
+    def __init__(self, board_size, starting_player):
         self.board_size = board_size
         self.board = []
         self.reset_board()
+        self.player = starting_player
 
     def reset_board(self):
         self.board = np.array(
@@ -36,12 +37,13 @@ class Board:
         except IndexError:
             return False
 
-    def make_move(self, move, player):
+    def make_move(self, move):
         if not self.check_legal_move(move):
             raise Exception("Illegal move provided")
-        if player != 1 and player != 2:
+        if self.player != 1 and self.player != 2:
             raise Exception("player must be either 1 or 2")
-        self.board[move[0]][move[1]] = player
+        self.board[move[0]][move[1]] = self.player
+        self.player = self.player % 2 + 1
 
     def flatten_board(self):
         return self.board.flatten()
