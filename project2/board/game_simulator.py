@@ -6,6 +6,7 @@ class GameSimulator:
         self.board = Board(board_size, starting_player)
         self.playing_board = playing_board
         self.board_size = board_size
+        self.starting_player = starting_player
         self.tree = tree
         self.state_action = {}
 
@@ -41,5 +42,5 @@ class GameSimulator:
         return self.tree.get_distribution(self.playing_board)
 
     def reset(self):
-        self.board = Board(self.board_size)
+        self.board = Board(self.board_size, self.starting_player)
         self.state_action = {}
