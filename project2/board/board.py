@@ -6,13 +6,14 @@ class Board:
     def __init__(self, board_size, starting_player):
         self.board_size = board_size
         self.board = []
-        self.reset_board()
         self.player = starting_player
+        self.reset_board(self.player)
 
-    def reset_board(self):
+    def reset_board(self, starting_player):
         self.board = np.array(
             [[0 for i in range(self.board_size)] for j in range(self.board_size)]
         )
+        self.player = starting_player
 
     def get_state(self):
         output = ""
@@ -39,7 +40,7 @@ class Board:
 
     def make_move(self, move):
         if not self.check_legal_move(move):
-            raise Exception("Illegal move provided")
+            raise Exception(f"Illegal move provided: {move} {self.flatten_board()}")
         if self.player != 1 and self.player != 2:
             raise Exception("player must be either 1 or 2")
         self.board[move[0]][move[1]] = self.player
@@ -101,6 +102,7 @@ class Board:
             return (
                 self.check_winning_state_player_one()
                 or self.check_winning_state_player_two()
+                or len(self.get_legal_moves()) == 0
             )
 
     def get_reward(self, player):

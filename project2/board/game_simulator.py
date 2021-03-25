@@ -21,7 +21,7 @@ class GameSimulator:
 
     def rollout_game(self, epsilon, board_copy):
         while not board_copy.check_winning_state():
-            next_move = self.tree.rollout_action(board_copy.get_state(), epsilon, board_copy.player)
+            next_move = self.tree.rollout_action(board_copy, epsilon, board_copy.player)
             board_copy.make_move(next_move)
 
     def tree_search(self, board_copy):
@@ -42,7 +42,7 @@ class GameSimulator:
                 self.tree.update(key[1], self.state_action[key], rewards[key[0]])
             board_copy = self.board.clone()
         self.tree.memoized_preds = {}
-        return self.tree.get_distribution(self.playing_board)
+        return self.tree.get_distribution(self.board)
 
     def reset(self):
         self.board = Board(self.board_size, self.starting_player)

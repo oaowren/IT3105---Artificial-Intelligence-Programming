@@ -1,3 +1,4 @@
+from NeuralNetwork.randomplayer import RandomPlayer
 from NeuralNetwork.neuralnet import NeuralNet
 from parameters import Parameters
 from board.board import Board
@@ -20,13 +21,14 @@ sim = GameSimulator(board, p.board_size, p.starting_player, tree)
 topp = p.topp
 
 
-def run_full_game(epsilon):
-    board.reset_board()
+def run_full_game(epsilon, starting_player):
+    board.reset_board(starting_player)
     while not board.check_winning_state():
         tree.root = board.get_state()
         sim.initialize_root(tree.root, board.player)
         D = sim.sim_games(epsilon, p.number_of_search_episodes)
-        rbuf[str(board.player) + " " + tree.root] = D
+        s = str(board.player) + " " + tree.root
+        rbuf[s] = D
         next_move = get_best_move_from_D(D)
         board.make_move(next_move)
         sim.reset()
@@ -43,6 +45,7 @@ def get_best_move_from_D(D):
     return best_move
 
 def run_topp_game(actor1, actor2, starting_player, visualize=True):
+    board.reset_board(starting_player)
     player_no = starting_player
     player = actor1 if player_no == 1 else actor2
     if visualize:
@@ -50,7 +53,7 @@ def run_topp_game(actor1, actor2, starting_player, visualize=True):
         time.sleep(1)
     while not board.check_winning_state():
         split_state = np.concatenate(([player_no], [int(i) for i in board.get_state().split()]))
-        preds = actor1.predict(np.array([split_state]))
+        preds = player.predict(np.array([split_state]))
         move = player.best_action(preds)
         board.make_move(move)
         player_no = player_no % 2 + 1
@@ -63,18 +66,36 @@ def run_topp_game(actor1, actor2, starting_player, visualize=True):
     if visualize:
         board_visualizer.draw_board(board.board)
         time.sleep(1)
+    return winning_player
 
 
 if __name__ == "__main__":
     if (p.topp):
-        actor1 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=p.actor1_episode)
-        actor2 = NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=p.actor2_episode)
-        run_topp_game(actor1, actor2, 1)
+        episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
+        actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
+        actorscore = [0 for _ in episodes]
+        for i in range(len(actors)):
+            for n in range(i+1, len(actors)):
+                player1 = 0
+                player2 = 0
+                print(f"Actor[{episodes[i]} episodes] vs. actor[{episodes[n]} episodes]")
+                for game in range(p.topp_games):
+                    winner = run_topp_game(actors[i], actors[n], game % 2 + 1, visualize= False)
+                    player1 += 1 if winner == 1 else 0
+                    player2 += 1 if winner == 2 else 0
+                print(f"Actor[{episodes[i]} episodes] won {player1} times.\nActor[{episodes[n]} episodes] won {player2} times.\n")
+                actorscore[i]+=player1
+                actorscore[n]+=player2
+        print("---------FINAL SCORES-----------")
+        for i in range(len(episodes)):
+            print(f"Actor[{episodes[i]} episodes]: {actorscore[i]} wins")
     else:
         epsilon = p.epsilon
+        nn.save_model(f"{p.board_size}x{p.board_size}_ep", 0)
         for game in range(p.number_of_games):
-            run_full_game(epsilon)
             print("Game no. " + str(game+1))
+            run_full_game(epsilon, game % 2 + 1)
             epsilon *= p.epsilon_decay
-            if game % save_interval == 0:
+            if game % save_interval == 0 and game != 0:
                 nn.save_model(f"{p.board_size}x{p.board_size}_ep", game)
+        nn.save_model(f"{p.board_size}x{p.board_size}_ep", p.number_of_games)

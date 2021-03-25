@@ -1,4 +1,5 @@
 from NeuralNetwork.neuralnet import NeuralNet
+import random
 """
 Dette er hovedsaklig basert på algoritmen fra
 http://www.cs.cornell.edu/courses/cs6700/2016sp/lectures/CS6700-UCT.pdf
@@ -48,13 +49,19 @@ class MCTS:
             dist.append((move, self.get_N(state, move)))
         return dist
 
-    def rollout_action(self, state, epsilon, player):
+    def rollout_action(self, board, epsilon, player):
+        if random.random() < epsilon:
+            return self.random_action(board)
+        state = board.get_state()
         if (player, state) in self.memoized_preds:
-            return self.nn.epsilon_best_action(self.memoized_preds[(player,state)], epsilon)
+            return self.nn.best_action(self.memoized_preds[(player,state)])
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nn.predict(np.array([split_state]))
         self.memoized_preds[(player, state)] = preds
-        return self.nn.epsilon_best_action(preds, epsilon)
+        return self.nn.best_action(preds)
+
+    def random_action(self, board):
+        return random.choice(board.get_legal_moves())
 
     def expand_tree(self, board, player):
         state = board.get_state()

@@ -67,7 +67,7 @@ class NeuralNet:
             )
         model.compile(
             optimizer=opt(learning_rate=lr),
-            loss="categorical_crossentropy",
+            loss="kl_divergence",
             metrics=["accuracy"],
         )
         model.summary()
@@ -77,7 +77,7 @@ class NeuralNet:
         if self.topp:
             raise Exception("Model should not train during TOPP")
         train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
-        train_x, train_y = self.random_minibatch(train_x, train_y, 10)
+        train_x, train_y = self.random_minibatch(train_x, train_y, 50)
         self.model.fit(
             train_x, train_y, epochs=epochs, verbose=verbosity, batch_size=batch_size
         )
@@ -101,12 +101,6 @@ class NeuralNet:
     def best_action(self, normalized_predictions):
         i = np.argmax(normalized_predictions[0])
         return NeuralNet.convert_to_2d_move(i, self.board_size)
-
-    def epsilon_best_action(self, normalized_predictions, epsilon):
-        if random.random() < epsilon:
-            move = random.choice([NeuralNet.convert_to_2d_move(i, self.board_size) for i in range(len(normalized_predictions[0])) if normalized_predictions[0][i] != 0])
-            return move
-        return self.best_action(normalized_predictions)
 
     def save_model(self, model_name, episode_number):
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
