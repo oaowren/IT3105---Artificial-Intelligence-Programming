@@ -12,7 +12,6 @@ class MCTS:
 
     def __init__(self, root, nn):
         self.root = root
-        self.tree_policy = {}
         self.states= {}
         self.state_action = {}
         self.c = 1

@@ -34,7 +34,7 @@ class GameSimulator:
     def sim_games(self, epsilon, number_of_search_games):
         board_copy = self.board.clone()
         self.tree.expand_tree(board_copy, board_copy.player)
-        for _ in range(number_of_search_games):
+        for i in range(number_of_search_games):
             self.tree_search(board_copy)
             self.rollout_game(epsilon, board_copy)
             rewards = {1:board_copy.get_reward(1), 2: board_copy.get_reward(2)}
