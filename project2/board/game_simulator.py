@@ -19,12 +19,9 @@ class GameSimulator:
 
 
     def rollout_game(self, epsilon, board_copy):
-        count = 0
         while not board_copy.check_winning_state():
             next_move = self.tree.rollout_action(board_copy, epsilon, board_copy.player)
             board_copy.make_move(next_move)
-            count += 1
-        return count
 
     def tree_search(self, board_copy):
         sequence = self.tree.traverse(board_copy, board_copy.player)
@@ -34,17 +31,15 @@ class GameSimulator:
             self.state_action[(i[0],i[1])] = i[2]
 
     def sim_games(self, epsilon, number_of_search_games):
-        count = 0
         board_copy = self.board.clone()
         self.tree.expand_tree(board_copy, board_copy.player)
         for i in range(number_of_search_games):
             self.tree_search(board_copy)
-            count += self.rollout_game(epsilon, board_copy)
+            self.rollout_game(epsilon, board_copy)
             rewards = {1:board_copy.get_reward(1), 2: board_copy.get_reward(2)}
             for key in self.state_action.keys():
                 self.tree.update(key[1], self.state_action[key], rewards[key[0]])
             board_copy = self.board.clone()
-        print(count)
         return self.tree.get_distribution(self.board)
 
     def reset(self, player):
