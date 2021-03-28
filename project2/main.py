@@ -31,7 +31,7 @@ def run_full_game(epsilon, starting_player):
         rbuf[s] = D
         next_move = get_best_move_from_D(D)
         board.make_move(next_move)
-        sim.reset()
+        sim.reset(board.player)
     nn.fit([[int(i) for i in r.split()] for r in rbuf.keys()],\
          [NeuralNet.normalize(np.array([i[1] for i in rbuf[key]])) for key in rbuf.keys()])
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         nn.save_model(f"{p.board_size}x{p.board_size}_ep", 0)
         for game in range(p.number_of_games):
             print("Game no. " + str(game+1))
-            run_full_game(epsilon, game % 2 + 1)
+            run_full_game(epsilon, game % 2 + 1 if p.starting_player==0 else p.starting_player)
             epsilon *= p.epsilon_decay
             if game % save_interval == 0 and game != 0:
                 nn.save_model(f"{p.board_size}x{p.board_size}_ep", game)

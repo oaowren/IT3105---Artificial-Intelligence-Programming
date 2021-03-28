@@ -7,7 +7,6 @@ class GameSimulator:
         self.board = Board(board_size, starting_player)
         self.playing_board = playing_board
         self.board_size = board_size
-        self.starting_player = starting_player
         self.tree = tree
         self.state_action = {}
 
@@ -44,6 +43,6 @@ class GameSimulator:
         self.tree.memoized_preds = {}
         return self.tree.get_distribution(self.board)
 
-    def reset(self):
-        self.board = Board(self.board_size, self.starting_player)
+    def reset(self, player):
+        self.board = Board(self.board_size, player)
         self.state_action = {}
