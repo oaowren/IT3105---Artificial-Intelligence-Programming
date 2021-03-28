@@ -40,7 +40,6 @@ class GameSimulator:
             for key in self.state_action.keys():
                 self.tree.update(key[1], self.state_action[key], rewards[key[0]])
             board_copy = self.board.clone()
-        self.tree.memoized_preds = {}
         return self.tree.get_distribution(self.board)
 
     def reset(self, player):

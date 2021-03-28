@@ -1,5 +1,6 @@
 from tensorflow import keras as ks
 import numpy as np
+import math
 import random
 
 # Static values used to select activation function

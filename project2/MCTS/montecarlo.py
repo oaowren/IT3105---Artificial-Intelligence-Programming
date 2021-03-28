@@ -16,7 +16,6 @@ class MCTS:
         self.state_action = {}
         self.c = 1
         self.nn = nn
-        self.memoized_preds = {}
 
     def update(self, state, action, reward):
         self.states[state]["N"] +=1
@@ -52,11 +51,8 @@ class MCTS:
         if random.random() < epsilon:
             return self.random_action(board)
         state = board.get_state()
-        if (player, state) in self.memoized_preds:
-            return self.nn.best_action(self.memoized_preds[(player,state)])
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nn.predict(np.array([split_state]))
-        self.memoized_preds[(player, state)] = preds
         return self.nn.best_action(preds)
 
     def random_action(self, board):
