@@ -1,4 +1,3 @@
-from NeuralNetwork.randomplayer import RandomPlayer
 from NeuralNetwork.neuralnet import NeuralNet
 from parameters import Parameters
 from board.board import Board
@@ -6,6 +5,7 @@ from board.board_visualizer import BoardVisualizer
 from board.game_simulator import GameSimulator
 from Client_side.BasicClientActor import BasicClientActor
 from MCTS.montecarlo import MCTS
+from scipy.special import softmax
 import numpy as np
 import time
 
@@ -34,7 +34,7 @@ def run_full_game(epsilon, starting_player):
         sim.reset(board.player)
     tree.memoized_preds = {}
     inputs = [[int(i) for i in r.split()] for r in rbuf.keys()]
-    targets = [NeuralNet.normalize(np.array([i[1] for i in rbuf[key]])) for key in rbuf.keys()]
+    targets = [softmax([i[1] for i in rbuf[key]]) for key in rbuf.keys()]
     nn.fit(inputs, targets)
 
 def get_best_move_from_D(D):

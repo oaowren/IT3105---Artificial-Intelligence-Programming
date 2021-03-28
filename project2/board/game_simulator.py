@@ -1,3 +1,4 @@
+import math
 from .board import Board
 import numpy as np
 
@@ -33,7 +34,9 @@ class GameSimulator:
     def sim_games(self, epsilon, number_of_search_games):
         board_copy = self.board.clone()
         self.tree.expand_tree(board_copy, board_copy.player)
-        for i in range(number_of_search_games):
+        no_of_legal_moves = len(board_copy.get_legal_moves())
+        dynamic_range = int(number_of_search_games/(math.log(no_of_legal_moves+board_copy.board_size, board_copy.board_size)))
+        for i in range(dynamic_range):
             self.tree_search(board_copy)
             self.rollout_game(epsilon, board_copy)
             rewards = {1:board_copy.get_reward(1), 2: board_copy.get_reward(2)}

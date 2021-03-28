@@ -1,7 +1,5 @@
 from tensorflow import keras as ks
 import numpy as np
-import math
-import random
 
 # Static values used to select activation function
 acts = {
@@ -89,15 +87,14 @@ class NeuralNet:
         predictions = self.model.predict(inputs)
         pred_length = len(predictions)
         illegal_moves_removed = np.array(
-            [
-                [
-                    predictions[n][i] if inputs[0][i+1] == 0 else 0
-                    for i in range(len(predictions[n]))
-                ]
-                for n in range(pred_length)
+            [NeuralNet.normalize(np.array([
+                predictions[n][i] if inputs[0][i+1] == 0 else 0
+                for i in range(len(predictions[n]))
+            ]))
+            for n in range(pred_length)
             ]
         )
-        return np.array([NeuralNet.normalize(illegal_moves_removed[i]) for i in range(pred_length)])
+        return illegal_moves_removed
 
     def best_action(self, normalized_predictions):
         i = np.argmax(normalized_predictions[0])
