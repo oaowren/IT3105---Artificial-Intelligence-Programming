@@ -32,6 +32,7 @@ def run_full_game(epsilon, starting_player):
         next_move = get_best_move_from_D(D)
         board.make_move(next_move)
         sim.reset(board.player)
+    tree.memoized_preds = {}
     inputs = [[int(i) for i in r.split()] for r in rbuf.keys()]
     targets = [NeuralNet.normalize(np.array([i[1] for i in rbuf[key]])) for key in rbuf.keys()]
     nn.fit(inputs, targets)
