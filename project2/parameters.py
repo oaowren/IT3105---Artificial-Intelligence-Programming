@@ -9,10 +9,12 @@ class Parameters:
         self.epsilon = 1
         self.epsilon_decay = 0.97
         # ANET parameters
-        self.lr = 0.01
-        self.nn_dims = (60, 60, 40)
-        self.activation_function = "relu"
+        self.lr = 0.001
+        self.nn_dims = (20, 40, 60, 40, 20)
+        self.activation_function = "sigmoid"
         self.optimizer = "adam"
+        self.sigma = 1
+        self.sigma_decay = 0.9
         # TOPP parameters
         self.number_of_cached_anet = 5
         self.topp = False

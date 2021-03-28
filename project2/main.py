@@ -13,6 +13,7 @@ p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
 save_interval = p.number_of_games // p.number_of_cached_anet
 rbuf = {}
+state_rewards = {}
 nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size, p.starting_player)
 board_visualizer = BoardVisualizer()
@@ -21,20 +22,27 @@ sim = GameSimulator(board, p.board_size, p.starting_player, tree)
 topp = p.topp
 
 
-def run_full_game(epsilon, starting_player):
+def run_full_game(epsilon, sigma, starting_player):
     board.reset_board(starting_player)
+    game_sequence = []
     while not board.check_winning_state():
         tree.root = board.get_state()
         sim.initialize_root(tree.root, board.player)
-        D = sim.sim_games(epsilon, p.number_of_search_episodes)
+        D = sim.sim_games(epsilon, sigma, p.number_of_search_episodes)
         s = str(board.player) + " " + tree.root
+        game_sequence.append(s)
         rbuf[s] = D
         next_move = get_best_move_from_D(D)
         board.make_move(next_move)
         sim.reset(board.player)
     tree.memoized_preds = {}
-    inputs = [[int(i) for i in r.split()] for r in rbuf.keys()]
-    targets = [softmax([i[1] for i in rbuf[key]]) for key in rbuf.keys()]
+    reward = {1:board.get_reward(1), 2: board.get_reward(2)}
+    game_rewards = [reward[int(i.split()[0])] for i in game_sequence]
+    for s in game_sequence:
+        state_rewards[s] = game_rewards[int(s.split()[0])]
+    inputs = np.array([[int(i) for i in r.split()] for r in rbuf.keys()])
+    targets = {"actor_output": np.array([softmax([i[1] for i in rbuf[key]]) for key in rbuf.keys()]),
+               "critic_output": np.array([[state_rewards[key]] for key in rbuf.keys()])}
     nn.fit(inputs, targets)
 
 def get_best_move_from_D(D):
@@ -55,7 +63,7 @@ def run_topp_game(actor1, actor2, starting_player, visualize=True):
         time.sleep(1)
     while not board.check_winning_state():
         split_state = np.concatenate(([player_no], [int(i) for i in board.get_state().split()]))
-        preds = player.predict(np.array([split_state]))
+        preds = player.predict(np.array([split_state]))[0]
         move = player.best_action(preds)
         board.make_move(move)
         player_no = player_no % 2 + 1
@@ -93,11 +101,12 @@ if __name__ == "__main__":
             print(f"Actor[{episodes[i]} episodes]: {actorscore[i]} wins")
     else:
         epsilon = p.epsilon
-        nn.save_model(f"{p.board_size}x{p.board_size}_ep", 0)
+        sigma = p.sigma
         for game in range(p.number_of_games):
-            print("Game no. " + str(game+1))
-            run_full_game(epsilon, game % 2 + 1 if p.starting_player==0 else p.starting_player)
-            epsilon *= p.epsilon_decay
-            if game % save_interval == 0 and game != 0:
+            if game % save_interval == 0:
                 nn.save_model(f"{p.board_size}x{p.board_size}_ep", game)
+            print("Game no. " + str(game+1))
+            run_full_game(epsilon, sigma, game % 2 + 1 if p.starting_player==0 else p.starting_player)
+            epsilon *= p.epsilon_decay
+            sigma *= p.sigma_decay
         nn.save_model(f"{p.board_size}x{p.board_size}_ep", p.number_of_games)

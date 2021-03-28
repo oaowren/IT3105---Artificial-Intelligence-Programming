@@ -42,7 +42,6 @@ class NeuralNet:
         self.topp = load_saved_model
 
     def init_model(self, nn_dims, board_size, lr, activation, optimizer):
-        model = ks.Sequential()
         activation_function = acts.get(activation, None)
         if activation_function is None:
             raise ValueError(
@@ -50,13 +49,17 @@ class NeuralNet:
                     "', '".join(acts.keys())
                 )
             )
-        model.add(ks.Input(shape=(board_size ** 2 + 1)))
+        x = ks.layers.Input(shape=(board_size ** 2 + 1))
+        input_layer = x
         # Ensure that input has correct shape
-        model.add(ks.layers.Dense(board_size ** 2 + 1, activation=activation_function))
+        input_layer = ks.layers.Dense(board_size ** 2 + 1, activation=activation_function)(input_layer)
         for i in nn_dims:
-            model.add(ks.layers.Dense(i, activation=activation_function))
+            input_layer = ks.layers.Dense(i, activation=activation_function)(input_layer)
         # Ensure that output has correct shape and activation softmax
-        model.add(ks.layers.Dense(board_size ** 2, activation="softmax"))
+        actor_output = ks.layers.Dense(board_size ** 2)(input_layer)
+        actor_output = ks.layers.Activation(activation="softmax", name="actor_output")(actor_output)
+        critic_output = ks.layers.Dense(1)(input_layer)
+        critic_output = ks.layers.Activation(activation="tanh", name="critic_output")(critic_output)
         opt = optimizers.get(optimizer, None)
         if opt is None:
             raise ValueError(
@@ -64,10 +67,17 @@ class NeuralNet:
                     "', '".join(optimizers.keys())
                 )
             )
+        model = ks.Model(inputs=x, outputs=[actor_output, critic_output])
+        losses = {
+            "actor_output": "kl_divergence",
+            "critic_output": "mse",
+        }
+        loss_weights = {"actor_output": 1.0, "critic_output": 1.0}
         model.compile(
             optimizer=opt(learning_rate=lr),
-            loss="kl_divergence",
-            metrics=["accuracy"],
+            loss=losses,
+            loss_weights=loss_weights,
+            metrics=["accuracy"]
         )
         model.summary()
         return model
@@ -78,23 +88,22 @@ class NeuralNet:
         train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
         train_x, train_y = self.random_minibatch(train_x, train_y, len(train_x) // 3)
         self.model.fit(
-            train_x, train_y, epochs=epochs, verbose=verbosity, batch_size=batch_size
+            inputs, targets, epochs=epochs, verbose=verbosity, batch_size=batch_size
         )
-        e = self.model.evaluate(valid_x, valid_y, verbose=verbosity)
-        print(format('Loss: %.2f\tAccuracy: %.2f' % (e[0], e[1])))
+        print(self.model.evaluate(valid_x, valid_y, verbose=verbosity))
 
     def predict(self, inputs):
         predictions = self.model.predict(inputs)
-        pred_length = len(predictions)
+        pred_length = len(predictions[0])
         illegal_moves_removed = np.array(
             [NeuralNet.normalize(np.array([
-                predictions[n][i] if inputs[0][i+1] == 0 else 0
-                for i in range(len(predictions[n]))
+                predictions[0][n][i] if inputs[0][i+1] == 0 else 0
+                for i in range(len(predictions[0][n]))
             ]))
             for n in range(pred_length)
             ]
         )
-        return illegal_moves_removed
+        return illegal_moves_removed, predictions[1]
 
     def best_action(self, normalized_predictions):
         i = np.argmax(normalized_predictions[0])
@@ -113,24 +122,30 @@ class NeuralNet:
 
     def random_minibatch(self, inputs, targets, size=10):
         indices = np.random.randint(len(inputs), size=size)
-        return inputs[indices], targets[indices]
+        actor_targets = targets["actor_output"][indices]
+        critic_targets = targets["critic_output"][indices]
+        return inputs[indices], {"actor_output": actor_targets, "critic_output": critic_targets}
 
     def train_test_split(self, inputs, targets, split=0.1, randomize=True):
         vc = round(split * len(inputs))
+        actor_targets = targets["actor_output"]
+        critic_targets = targets["critic_output"]
         if split > 0:
-            pairs = list(zip(inputs, targets))
+            pairs = list(zip(inputs, actor_targets, critic_targets))
             if randomize:
                 np.random.shuffle(pairs)
             vcases = pairs[0:vc]
             tcases = pairs[vc:]
             return (
                 np.array([tc[0] for tc in tcases]),
-                np.array([tc[1] for tc in tcases]),
+                {"actor_output": np.array([tc[1] for tc in tcases]),
+                 "critic_output": np.array([tc[2] for tc in tcases])},
                 np.array([vc[0] for vc in vcases]),
-                np.array([vc[1] for vc in vcases]),
+                {"actor_output": np.array([vc[1] for vc in vcases]),
+                 "critic_output": np.array([vc[2] for vc in vcases])},
             )
         else:
-            return inputs, targets, [], []
+            return inputs, targets, [], {"actor_output":[], "critic_output":[]}
 
     @staticmethod
     def convert_to_2d_move(index, board_size):

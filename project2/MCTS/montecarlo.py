@@ -56,8 +56,14 @@ class MCTS:
             return self.nn.best_action(self.memoized_preds[(player,state)])
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nn.predict(np.array([split_state]))
-        self.memoized_preds[(player, state)] = preds
-        return self.nn.best_action(preds)
+        self.memoized_preds[(player, state)] = preds[0]
+        return self.nn.best_action(preds[0])
+
+    def critic_evaluate(self, board, player):
+        state = board.get_state()
+        split_state = np.concatenate(([player], [int(i) for i in state.split()]))
+        preds = self.nn.predict(np.array([split_state]))
+        return preds[1][0][0]
 
     def random_action(self, board):
         return random.choice(board.get_legal_moves())
