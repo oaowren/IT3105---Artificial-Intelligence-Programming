@@ -21,15 +21,11 @@ class GameSimulator:
 
     def rollout_game(self, epsilon, sigma, board_copy):
         if random.uniform(0,1) > sigma:
-            reward = self.tree.critic_evaluate(board_copy, board_copy.player)
-            if board_copy.player == 1:
-                return {1: reward, 2: -1 * reward}
-            else:
-                return {1: -1 * reward, 2: reward}
+            return self.tree.critic_evaluate(board_copy, board_copy.player)
         while not board_copy.check_winning_state():
             next_move = self.tree.rollout_action(board_copy, epsilon, board_copy.player)
             board_copy.make_move(next_move)
-        return {1:board_copy.get_reward(1), 2: board_copy.get_reward(2)}
+        return board_copy.get_reward(1)
 
     def tree_search(self, board_copy):
         sequence = self.tree.traverse(board_copy, board_copy.player)
@@ -44,9 +40,9 @@ class GameSimulator:
         dynamic_range = int(number_of_search_games/(math.log(no_of_legal_moves+2, board_copy.board_size)))
         for i in range(dynamic_range):
             sequence = self.tree_search(board_copy)
-            rewards = self.rollout_game(epsilon, sigma, board_copy)
+            reward = self.rollout_game(epsilon, sigma, board_copy)
             for s in sequence:
-                self.tree.update(s[1], s[2], rewards[s[0]])
+                self.tree.update(s[1], s[2], reward)
             board_copy = self.board.clone()
         return self.tree.get_distribution(self.board)
 

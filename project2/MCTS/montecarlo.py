@@ -36,6 +36,7 @@ class MCTS:
     def get_Q(self, state, action):
         return self.state_action[(state,action)]["Q"]
 
+
     def exploration_bonus(self, state, action):
         exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state) + 1)/(1 + self.get_N(state,action)))
         return exploration_bonus

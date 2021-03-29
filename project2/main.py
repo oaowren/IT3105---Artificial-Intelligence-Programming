@@ -1,3 +1,4 @@
+from topp import TOPP
 from NeuralNetwork.neuralnet import NeuralNet
 from parameters import Parameters
 from board.board import Board
@@ -7,43 +8,45 @@ from Client_side.BasicClientActor import BasicClientActor
 from MCTS.montecarlo import MCTS
 from scipy.special import softmax
 import numpy as np
-import time
 
 p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
 save_interval = p.number_of_games // p.number_of_cached_anet
 rbuf = {}
-state_rewards = {}
 nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size, p.starting_player)
 board_visualizer = BoardVisualizer()
 tree = MCTS((p.starting_player, board.get_state()), nn)
 sim = GameSimulator(board, p.board_size, p.starting_player, tree)
-topp = p.topp
+topp = TOPP()
 
 
 def run_full_game(epsilon, sigma, starting_player):
+    # Starting state
     board.reset_board(starting_player)
-    game_sequence = []
     while not board.check_winning_state():
+        # Initialize simulations
         tree.root = board.get_state()
         sim.initialize_root(tree.root, board.player)
+        # Return distribution
         D = sim.sim_games(epsilon, sigma, p.number_of_search_episodes)
+        # Parse to state representation
         s = str(board.player) + " " + tree.root
-        game_sequence.append(s)
-        rbuf[s] = D
+        # Select move based on D
         next_move = get_best_move_from_D(D)
+        Q = tree.get_Q(tree.root, next_move)
+        # Add to replay buffer
+        rbuf[s] = (D, Q)
         board.make_move(next_move)
         sim.reset(board.player)
+    # Reset memoization of visited states during rollouts
     tree.memoized_preds = {}
-    reward = {1:board.get_reward(1), 2: board.get_reward(2)}
-    game_rewards = [reward[int(i.split()[0])] for i in game_sequence]
-    for s in game_sequence:
-        state_rewards[s] = game_rewards[int(s.split()[0])]
     inputs = np.array([[int(i) for i in r.split()] for r in rbuf.keys()])
-    targets = {"actor_output": np.array([softmax([i[1] for i in rbuf[key]]) for key in rbuf.keys()]),
-               "critic_output": np.array([[state_rewards[key]] for key in rbuf.keys()])}
-    nn.fit(inputs, targets)
+    actor_target = np.array([softmax([i[1] for i in rbuf[key][0]]) for key in rbuf.keys()])
+    critic_target = np.array([[rbuf[key][1]] for key in rbuf.keys()])
+    targets = {"actor_output": actor_target,
+               "critic_output": critic_target}
+    nn.fit(inputs, targets, batch_size=p.batch_size)
 
 def get_best_move_from_D(D):
     best_move = None
@@ -54,51 +57,12 @@ def get_best_move_from_D(D):
             most_visits = d[1]
     return best_move
 
-def run_topp_game(actor1, actor2, starting_player, visualize=True):
-    board.reset_board(starting_player)
-    player_no = starting_player
-    player = actor1 if player_no == 1 else actor2
-    if visualize:
-        board_visualizer.draw_board(board.board)
-        time.sleep(1)
-    while not board.check_winning_state():
-        split_state = np.concatenate(([player_no], [int(i) for i in board.get_state().split()]))
-        preds = player.predict(np.array([split_state]))[0]
-        move = player.best_action(preds)
-        board.make_move(move)
-        player_no = player_no % 2 + 1
-        player = player = actor1 if player_no == 1 else actor2
-        if visualize:
-            board_visualizer.draw_board(board.board)
-            time.sleep(1)
-    winning_player = 1 if board.check_winning_state_player_one() else 2
-    print(f'Player {winning_player} wins!')
-    if visualize:
-        board_visualizer.draw_board(board.board)
-        time.sleep(1)
-    return winning_player
-
 
 if __name__ == "__main__":
     if (p.topp):
         episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
         actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
-        actorscore = [0 for _ in episodes]
-        for i in range(len(actors)):
-            for n in range(i+1, len(actors)):
-                player1 = 0
-                player2 = 0
-                print(f"Actor[{episodes[i]} episodes] vs. actor[{episodes[n]} episodes]")
-                for game in range(p.topp_games):
-                    winner = run_topp_game(actors[i], actors[n], game % 2 + 1, visualize= game==p.topp_games - 1)
-                    player1 += 1 if winner == 1 else 0
-                    player2 += 1 if winner == 2 else 0
-                print(f"Actor[{episodes[i]} episodes] won {player1} times.\nActor[{episodes[n]} episodes] won {player2} times.\n")
-                actorscore[i]+=player1
-                actorscore[n]+=player2
-        print("---------FINAL SCORES-----------")
-        for i in range(len(episodes)):
-            print(f"Actor[{episodes[i]} episodes]: {actorscore[i]} wins")
+        topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer)
     else:
         epsilon = p.epsilon
         sigma = p.sigma

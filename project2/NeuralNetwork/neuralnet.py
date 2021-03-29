@@ -1,3 +1,4 @@
+import random
 from tensorflow import keras as ks
 import numpy as np
 
@@ -82,15 +83,17 @@ class NeuralNet:
         model.summary()
         return model
 
-    def fit(self, inputs, targets, batch_size=None, epochs=1, verbosity=0):
+    def fit(self, inputs, targets, batch_size=64, epochs=1, verbosity=0):
         if self.topp:
             raise Exception("Model should not train during TOPP")
         train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
-        train_x, train_y = self.random_minibatch(train_x, train_y, 50)
+        train_x, train_y = self.random_minibatch(train_x, train_y, batch_size)
         self.model.fit(
             inputs, targets, epochs=epochs, verbose=verbosity, batch_size=batch_size
         )
-        print(self.model.evaluate(valid_x, valid_y, verbose=verbosity))
+        e = self.model.evaluate(valid_x, valid_y, verbose=verbosity)
+        if len(e) == 5:
+            print(format('Loss: %.2f\nActor loss: %.2f\nCritic loss: %.2f\nActor accuracy: %.2f\nCritic accuracy:%.2f' % (e[0], e[1], e[2], e[3], e[4])))
 
     def predict(self, inputs):
         predictions = self.model.predict(inputs)
@@ -121,7 +124,11 @@ class NeuralNet:
         return model
 
     def random_minibatch(self, inputs, targets, size=10):
-        indices = np.random.randint(len(inputs), size=size)
+        if (size >= len(inputs)):
+            return inputs, targets
+        weight = np.linspace(0, 1, len(inputs))
+        index = [i for i in range(len(inputs))]
+        indices = np.array(random.choices(index, weights=weight, k=size))
         actor_targets = targets["actor_output"][indices]
         critic_targets = targets["critic_output"][indices]
         return inputs[indices], {"actor_output": actor_targets, "critic_output": critic_targets}
