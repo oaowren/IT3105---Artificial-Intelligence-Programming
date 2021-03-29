@@ -23,9 +23,9 @@ class GameSimulator:
         if random.uniform(0,1) > sigma:
             reward = self.tree.critic_evaluate(board_copy, board_copy.player)
             if board_copy.player == 1:
-                return {1: reward, 2:0}
+                return {1: reward, 2: -1 * reward}
             else:
-                return {1: 0, 2: reward}
+                return {1: -1 * reward, 2: reward}
         while not board_copy.check_winning_state():
             next_move = self.tree.rollout_action(board_copy, epsilon, board_copy.player)
             board_copy.make_move(next_move)

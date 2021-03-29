@@ -90,7 +90,7 @@ if __name__ == "__main__":
                 player2 = 0
                 print(f"Actor[{episodes[i]} episodes] vs. actor[{episodes[n]} episodes]")
                 for game in range(p.topp_games):
-                    winner = run_topp_game(actors[i], actors[n], game % 2 + 1, visualize= False)
+                    winner = run_topp_game(actors[i], actors[n], game % 2 + 1, visualize= game==p.topp_games - 1)
                     player1 += 1 if winner == 1 else 0
                     player2 += 1 if winner == 2 else 0
                 print(f"Actor[{episodes[i]} episodes] won {player1} times.\nActor[{episodes[n]} episodes] won {player2} times.\n")
