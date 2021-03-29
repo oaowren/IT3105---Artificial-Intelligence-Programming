@@ -29,18 +29,17 @@ def run_full_game(epsilon, sigma, starting_player):
         tree.root = board.get_state()
         sim.initialize_root(tree.root, board.player)
         # Return distribution
-        D = sim.sim_games(epsilon, sigma, p.number_of_search_episodes)
+        D, Q = sim.sim_games(epsilon, sigma, p.number_of_search_episodes)
         # Parse to state representation
         s = str(board.player) + " " + tree.root
         # Select move based on D
         next_move = get_best_move_from_D(D)
-        Q = tree.get_Q(tree.root, next_move)
         # Add to replay buffer
         rbuf[s] = (D, Q)
         board.make_move(next_move)
         sim.reset(board.player)
+    tree.reset()
     # Reset memoization of visited states during rollouts
-    tree.memoized_preds = {}
     inputs = np.array([[int(i) for i in r.split()] for r in rbuf.keys()])
     actor_target = np.array([softmax([i[1] for i in rbuf[key][0]]) for key in rbuf.keys()])
     critic_target = np.array([[rbuf[key][1]] for key in rbuf.keys()])

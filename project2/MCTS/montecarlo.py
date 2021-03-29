@@ -21,6 +21,7 @@ class MCTS:
     def update(self, state, action, reward):
         self.states[state]["N"] +=1
         self.state_action[(state,action)]["N"] +=1
+        self.states[state]["Q"] += (reward - self.get_Q_state(state))/(1 + self.get_N(state))
         self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/(1 + self.get_N(state, action))
         return
 
@@ -30,11 +31,14 @@ class MCTS:
                 self.state_action[(state, action)] = {"N": 0, "Q": 0}
             return self.state_action[(state,action)]["N"]
         if state not in self.states:
-            self.states[state]["N"] = 0
+            self.states[state] = {"N":0, "Q": 0}
         return self.states[state]["N"]
 
     def get_Q(self, state, action):
         return self.state_action[(state,action)]["Q"]
+
+    def get_Q_state(self, state):
+        return self.states[state]["Q"]
 
 
     def exploration_bonus(self, state, action):
@@ -47,7 +51,7 @@ class MCTS:
         dist = []
         for move in moves:
             dist.append((move, self.get_N(state, move)))
-        return dist
+        return dist, self.get_Q_state(state)
 
     def rollout_action(self, board, epsilon, player):
         if random.random() < epsilon:
@@ -69,10 +73,10 @@ class MCTS:
     def random_action(self, board):
         return random.choice(board.get_legal_moves())
 
-    def expand_tree(self, board, player):
+    def expand_tree(self, board):
         state = board.get_state()
         legal_moves = board.get_legal_moves()
-        self.states[state] = {"N":0, "A": legal_moves, "P": player}
+        self.states[state] = {"N":0, "Q": 0}
         for move in legal_moves:
             board_copy = board.clone()
             board_copy.make_move(move)
@@ -103,4 +107,9 @@ class MCTS:
             traversal_sequence.append((player, board.get_state(), move))
             board.make_move(move)
         return traversal_sequence
+
+    def reset(self):
+        self.states={}
+        self.state_action={}
+        self.memoized_preds = {}
 

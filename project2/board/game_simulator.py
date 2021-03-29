@@ -35,7 +35,7 @@ class GameSimulator:
 
     def sim_games(self, epsilon, sigma, number_of_search_games):
         board_copy = self.board.clone()
-        self.tree.expand_tree(board_copy, board_copy.player)
+        self.tree.expand_tree(board_copy)
         no_of_legal_moves = len(board_copy.get_legal_moves())
         dynamic_range = int(number_of_search_games/(math.log(no_of_legal_moves+2, board_copy.board_size)))
         for i in range(dynamic_range):
