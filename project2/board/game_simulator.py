@@ -35,11 +35,11 @@ class GameSimulator:
 
     def sim_games(self, epsilon, sigma, number_of_search_games):
         board_copy = self.board.clone()
-        self.tree.expand_tree(board_copy)
         no_of_legal_moves = len(board_copy.get_legal_moves())
         dynamic_range = int(number_of_search_games/(math.log(no_of_legal_moves+2, board_copy.board_size)))
         for i in range(dynamic_range):
             sequence = self.tree_search(board_copy)
+            self.tree.expand_tree(board_copy)
             reward = self.rollout_game(epsilon, sigma, board_copy)
             for s in sequence:
                 self.tree.update(s[1], s[2], reward)
