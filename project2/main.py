@@ -30,7 +30,7 @@ def run_full_game(starting_player):
         # Return distribution
         no_of_legal_moves = len(board.get_legal_moves(board.board))
         dynamic_range = int(p.number_of_search_episodes/(math.log(no_of_legal_moves+2, p.board_size)))
-        for i in range(p.number_of_search_episodes):
+        for i in range(dynamic_range):
             leaf = tree.traverse()
             node = tree.expand_tree(leaf)
             reward = tree.rollout_game(node)
@@ -54,7 +54,7 @@ def run_full_game(starting_player):
 if __name__ == "__main__":
     if (p.topp):
         episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
-        actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
+        actors = [NeuralNet(0, 0, board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
         topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer)
     else:
         for game in range(p.number_of_games):

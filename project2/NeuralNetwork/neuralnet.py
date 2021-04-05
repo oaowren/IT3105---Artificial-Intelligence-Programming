@@ -64,7 +64,7 @@ class NeuralNet:
         actor_output = ks.layers.Dense(board_size ** 2)(input_layer)
         actor_output = ks.layers.Activation(activation="softmax", name="actor_output")(actor_output)
         critic_output = ks.layers.Dense(1)(input_layer)
-        critic_output = ks.layers.Activation(activation="tanh", name="critic_output")(critic_output)
+        critic_output = ks.layers.Activation(activation="linear", name="critic_output")(critic_output)
         opt = optimizers.get(optimizer, None)
         if opt is None:
             raise ValueError(

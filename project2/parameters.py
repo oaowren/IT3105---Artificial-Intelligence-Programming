@@ -4,19 +4,19 @@ class Parameters:
         self.board_size = 4
         self.starting_player = 0 # 0 for mix
         # MCTS parameters
-        self.number_of_games = 100
-        self.number_of_search_episodes = 100
+        self.number_of_games = 20
+        self.number_of_search_episodes = 40
         self.epsilon = 1
-        self.epsilon_decay = 0.99
+        self.epsilon_decay = 0.95
         # ANET parameters
         self.lr = 0.001
         self.batch_size = 64
         self.nn_dims = (10, 64, 9)
         self.activation_function = "sigmoid"
         self.optimizer = "adam"
-        self.sigma = 1
-        self.sigma_decay = 1
+        self.sigma = 2
+        self.sigma_decay = 0.98
         # TOPP parameters
         self.number_of_cached_anet = 5
-        self.topp = False
+        self.topp = True
         self.topp_games = 10

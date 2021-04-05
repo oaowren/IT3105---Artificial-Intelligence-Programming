@@ -24,9 +24,9 @@ class MCTS:
 
     def update(self, goal_node, reward):
         node = goal_node
-        node.visit()
+        node.N += 1
         while node.parent:
-            node.parent.visit()
+            node.parent.N += 1
             node.parent.Q += (reward - node.Q) / node.N
             node = node.parent
 
@@ -37,8 +37,6 @@ class MCTS:
         for child in children:
             index = child.action[0] * size + child.action[1]
             dist[index] += child.N
-        if sum(dist) == 0:
-            return dist
         return NeuralNet.normalize(dist)
 
     def rollout_game(self, node):

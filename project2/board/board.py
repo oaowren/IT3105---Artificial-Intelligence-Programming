@@ -43,7 +43,7 @@ class Board:
 
     def get_child_states(self, player, state):
         moves = self.get_legal_moves(state)
-        states = [self.get_next_state(copy(state), move, player) for move in moves]
+        states = [self.get_next_state(state, move, player) for move in moves]
         return [Node(state, action, player) for (state, action) in zip(states, moves)]    
 
     def get_next_state(self, board, move, player):
@@ -51,8 +51,9 @@ class Board:
             raise Exception(f"Illegal move provided: {move} {self.flatten_board(board)}")
         if player != 1 and player != 2:
             raise Exception("player must be either 1 or 2")
-        board[move[0]][move[1]] = player
-        return board
+        new_board = copy(board)
+        new_board[move[0]][move[1]] = player
+        return new_board
 
     def make_move(self, move, player):
         if not self.check_legal_move(move, self.board):
