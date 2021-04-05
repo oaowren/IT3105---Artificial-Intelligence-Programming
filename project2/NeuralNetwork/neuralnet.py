@@ -22,6 +22,8 @@ optimizers = {
 class NeuralNet:
     def __init__(
         self,
+        epsilon,
+        sigma,
         nn_dims = (10),
         board_size = 3,
         lr = 0.01,
@@ -30,6 +32,8 @@ class NeuralNet:
         load_saved_model=False,
         episode_number=0,
     ):
+        self.epsilon = epsilon
+        self.sigma = sigma
         self.board_size = board_size
         if load_saved_model:
             try:
@@ -107,6 +111,16 @@ class NeuralNet:
             ]
         )
         return illegal_moves_removed, predictions[1]
+
+    def get_critic_eval(self, flat_state, player):
+        split_state = np.concatenate(([player], flat_state))
+        _, value = self.predict(np.array([split_state]))
+        return value[0][0]
+
+    def get_actor_eval(self, flat_state, player):
+        split_state = np.concatenate(([player], flat_state))
+        preds, _ = self.predict(np.array([split_state]))
+        return preds
 
     def best_action(self, normalized_predictions):
         i = np.argmax(normalized_predictions[0])

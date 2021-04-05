@@ -1,4 +1,6 @@
+from board.board import Board
 from NeuralNetwork.neuralnet import NeuralNet
+
 import random
 """
 Dette er hovedsaklig basert på algoritmen fra
@@ -10,106 +12,92 @@ import numpy as np
 
 class MCTS:
 
-    def __init__(self, root, nn):
-        self.root = root
-        self.states= {}
-        self.state_action = {}
-        self.c = 1
-        self.nn = nn
+    def __init__(self, actor, board_size, starting_player, c=1):
+        self.board = Board(board_size, starting_player)
+        self.root = None
+        self.c = c
+        self.actor = actor
         self.memoized_preds = {}
 
-    def update(self, state, action, reward):
-        self.states[state]["N"] +=1
-        self.state_action[(state,action)]["N"] +=1
-        self.states[state]["Q"] += (reward - self.get_Q_state(state))/(1 + self.get_N(state))
-        self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/(1 + self.get_N(state, action))
-        return
+    def set_root(self, node):
+        self.root = node
 
-    def get_N(self, state, action=None):
-        if action:
-            if (state,action) not in self.state_action:
-                self.state_action[(state, action)] = {"N": 0, "Q": 0}
-            return self.state_action[(state,action)]["N"]
-        if state not in self.states:
-            self.states[state] = {"N":0, "Q": 0}
-        return self.states[state]["N"]
+    def update(self, goal_node, reward):
+        node = goal_node
+        node.visit()
+        while node.parent:
+            node.parent.visit()
+            node.parent.Q += (reward - node.Q) / node.N
+            node = node.parent
 
-    def get_Q(self, state, action):
-        return self.state_action[(state,action)]["Q"]
+    def get_distribution(self):
+        size = self.board.board_size
+        dist = np.zeros(size**2)
+        children = self.root.get_children()
+        for child in children:
+            index = child.action[0] * size + child.action[1]
+            dist[index] += child.N
+        if sum(dist) == 0:
+            return dist
+        return NeuralNet.normalize(dist)
 
-    def get_Q_state(self, state):
-        return self.states[state]["Q"]
-
-
-    def exploration_bonus(self, state, action):
-        exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state) + 1)/(1 + self.get_N(state,action)))
-        return exploration_bonus
-
-    def get_distribution(self, board):
-        moves = [NeuralNet.convert_to_2d_move(i, board.board_size) for i in range(board.board_size ** 2)]
-        state = board.get_state()
-        dist = []
-        for move in moves:
-            dist.append((move, self.get_N(state, move)))
-        return dist, self.get_Q_state(state)
-
-    def rollout_action(self, board, epsilon, player):
-        if random.random() < epsilon:
-            return self.random_action(board)
-        state = board.get_state()
-        if (player, state) in self.memoized_preds:
-            return self.nn.best_action(self.memoized_preds[(player,state)])
-        split_state = np.concatenate(([player], [int(i) for i in state.split()]))
-        preds = self.nn.predict(np.array([split_state]))
-        self.memoized_preds[(player, state)] = preds[0]
-        return self.nn.best_action(preds[0])
-
-    def critic_evaluate(self, board, player):
-        state = board.get_state()
-        split_state = np.concatenate(([player], [int(i) for i in state.split()]))
-        preds = self.nn.predict(np.array([split_state]))
-        return preds[1][0][0]
-
-    def random_action(self, board):
-        return random.choice(board.get_legal_moves())
-
-    def expand_tree(self, board):
-        state = board.get_state()
-        legal_moves = board.get_legal_moves()
-        self.states[state] = {"N":0, "Q": 0}
-        for move in legal_moves:
-            board_copy = board.clone()
-            board_copy.make_move(move)
-            self.state_action[(state, move)] = {"N": 0, "Q": 0}
-
-    def select_action(self, board, player):
-        #Get max value for player 1, and min value for player 2
-        state = board.get_state()
-        moves = board.get_legal_moves()
-        if(player == 1):
-            values = [self.get_max_value_move(state, move) for move in moves]
-            index = values.index(max(values))
+    def rollout_game(self, node):
+        current_state, player = node.state, node.player
+        reward = 0
+        if random.random() > self.actor.sigma:
+            reward = self.actor.get_critic_eval(self.board.flatten_board(current_state), player)
         else:
-            values = [self.get_min_value_move(state, move) for move in moves]
-            index = values.index(min(values))
-        return moves[index]
+            while not self.board.check_winning_state(current_state):
+                action = None
+                if random.random() < self.actor.epsilon:
+                    action = self.random_action(current_state)
+                else:
+                    preds = self.actor.get_actor_eval(self.board.flatten_board(current_state), player)
+                    action = self.actor.best_action(preds)
+                current_state = self.board.get_next_state(current_state, action, player)
+                player = player % 2 + 1
+            winner = player % 2 + 1
+            reward = 1 if winner == 1 else -1
+        return reward
 
-    def get_max_value_move(self, board, move):
-        return self.get_Q(board, move) + self.exploration_bonus(board, move)
+    def random_action(self, state):
+        return random.choice(self.board.get_legal_moves(state))
 
-    def get_min_value_move(self, board, move):
-        return self.get_Q(board, move) - self.exploration_bonus(board, move)
+    def expand_tree(self, node):
+        if self.board.check_winning_state(node.state):
+            return node
+        node.children = self.board.get_child_states(node.player, node.state)
+        child_player = node.player % 2 + 1
+        for child in node.children:
+            child.player = child_player
+            child.parent = node
+        return node
 
-    def traverse(self, board, player):
-        traversal_sequence = []
-        while not board.check_winning_state() and board.get_state() in self.states:
-            move = self.select_action(board, player)
-            traversal_sequence.append((player, board.get_state(), move))
-            board.make_move(move)
-        return traversal_sequence
+    def select_action(self, root):
+        #Get max value for player 1, and min value for player 2
+        moves = [(node, self.get_value_move(node, root.player)) for node in root.children]
 
-    def reset(self):
-        self.states={}
-        self.state_action={}
-        self.memoized_preds = {}
+        if(root.player == 1):
+            root, _ = max(moves, key=lambda x: x[1])
+        else:
+            root, _ = min(moves, key=lambda x: x[1])
+        return root
+
+    def get_value_move(self, node, player):
+        c = self.c if player == 1 else -self.c
+        return node.Q + c * np.sqrt(np.log(node.parent.N)/(1 + node.N))
+
+    def traverse(self):
+        root = self.root
+        children = root.get_children()
+        while len(children) != 0 and not self.board.check_winning_state(root.state):
+            root = self.select_action(root)
+            children = root.get_children()
+        return root
+
+    def get_best_move(self):
+        children = [(child, child.N) for child in self.root.children]
+        node, N = max(children, key=lambda x: x[1])
+        return node
+
 

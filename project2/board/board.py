@@ -1,5 +1,6 @@
+from MCTS.node import Node
 import numpy as np
-from copy import deepcopy
+from copy import *
 
 
 class Board:
@@ -28,39 +29,55 @@ class Board:
                 output += " "
         return output
 
-    def get_legal_moves(self):
-        flat_board = self.flatten_board()
-        return [(i // self.board_size, i % self.board_size) for i in range(len(flat_board)) if flat_board[i] == 0]
+    def get_legal_moves(self, board):
+        # Assumes a nxn board
+        board_size = len(board)
+        flat_board = self.flatten_board(board)
+        return [(i // board_size, i % board_size) for i in range(len(flat_board)) if flat_board[i] == 0]
 
-    def check_legal_move(self, move):
+    def check_legal_move(self, move, board):
         try:
-            return self.board[move[0]][move[1]] == 0
+            return board[move[0]][move[1]] == 0
         except IndexError:
             return False
 
-    def make_move(self, move):
-        if not self.check_legal_move(move):
-            raise Exception(f"Illegal move provided: {move} {self.flatten_board()}")
+    def get_child_states(self, player, state):
+        moves = self.get_legal_moves(state)
+        states = [self.get_next_state(copy(state), move, player) for move in moves]
+        return [Node(state, action, player) for (state, action) in zip(states, moves)]    
+
+    def get_next_state(self, board, move, player):
+        if not self.check_legal_move(move, board):
+            raise Exception(f"Illegal move provided: {move} {self.flatten_board(board)}")
+        if player != 1 and player != 2:
+            raise Exception("player must be either 1 or 2")
+        board[move[0]][move[1]] = player
+        return board
+
+    def make_move(self, move, player):
+        if not self.check_legal_move(move, self.board):
+            raise Exception(f"Illegal move provided: {move} {self.flatten_board(self.board)}")
         if self.player != 1 and self.player != 2:
             raise Exception("player must be either 1 or 2")
-        self.board[move[0]][move[1]] = self.player
-        self.player = self.player % 2 + 1
+        self.board[move[0]][move[1]] = player
 
-    def flatten_board(self):
-        return self.board.flatten()
 
-    def check_winning_state_player_one(self):
+    def flatten_board(self, board):
+        return board.flatten()
+
+    def check_winning_state_player_one(self, board):
+        board_size = len(board)
         reachable_nodes = []
-        for i in range(self.board_size):
-            if self.board[0][i] == 1:
+        for i in range(board_size):
+            if board[0][i] == 1:
                 reachable_nodes.append((0, i))
         for node in reachable_nodes:
             for n in range(-1, 2):
                 if (
-                    0 <= node[1] + n < self.board_size
-                    and self.board[node[0] + 1][node[1] + n] == 1
+                    0 <= node[1] + n < board_size
+                    and board[node[0] + 1][node[1] + n] == 1
                 ):
-                    if node[0] + 1 == self.board_size - 1:
+                    if node[0] + 1 == board_size - 1:
                         return True
                     if (
                         node[0] + 1,
@@ -70,16 +87,17 @@ class Board:
 
         return False
 
-    def check_winning_state_player_two(self):
+    def check_winning_state_player_two(self, board):
+        board_size = len(board)
         reachable_nodes = []
-        for i in range(self.board_size):
-            if self.board[i][0] == 2:
+        for i in range(board_size):
+            if board[i][0] == 2:
                 reachable_nodes.append((i, 0))
         for node in reachable_nodes:
             for n in range(-1, 2):
                 if (
-                    0 <= node[0] + n < self.board_size
-                    and self.board[node[0] + n][node[1] + 1] == 2
+                    0 <= node[0] + n < board_size
+                    and board[node[0] + n][node[1] + 1] == 2
                 ):
                     if node[1] + 1 == self.board_size - 1:
                         return True
@@ -88,26 +106,26 @@ class Board:
 
         return False
 
-    def check_winning_state(self, player=0):
+    def check_winning_state(self, board, player=0):
         """Since winning state must be checked after every move, this function
         takes in which player played the last move, to only check wheter they
         are in a winning state or not. This is to reduce the complexity of the
         algorithm.
         """
         if player == 1:
-            return self.check_winning_state_player_one()
+            return self.check_winning_state_player_one(board)
         elif player == 2:
-            return self.check_winning_state_player_two()
+            return self.check_winning_state_player_two(board)
         elif player == 0:
             return (
-                self.check_winning_state_player_one()
-                or self.check_winning_state_player_two()
-                or len(self.get_legal_moves()) == 0
+                self.check_winning_state_player_one(board)
+                or self.check_winning_state_player_two(board)
+                or len(self.get_legal_moves(board)) == 0
             )
 
     def get_reward(self, player):
-        if (player == 1 and self.check_winning_state_player_one()) \
-            or (player == 2 and self.check_winning_state_player_two()):
+        if (player == 1 and self.check_winning_state_player_one(self.board)) \
+            or (player == 2 and self.check_winning_state_player_two(self.board)):
             return 1
         else:
             return -1
