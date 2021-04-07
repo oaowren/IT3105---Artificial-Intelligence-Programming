@@ -55,7 +55,7 @@ class Board:
             if self.board[0][i] == 1:
                 reachable_nodes.append((0, i))
         for node in reachable_nodes:
-            for n in range(-1, 2):
+            for n in range(0, 2):
                 if (
                     0 <= node[1] + n < self.board_size
                     and self.board[node[0] + 1][node[1] + n] == 1
@@ -76,7 +76,7 @@ class Board:
             if self.board[i][0] == 2:
                 reachable_nodes.append((i, 0))
         for node in reachable_nodes:
-            for n in range(-1, 2):
+            for n in range(-1, 1):
                 if (
                     0 <= node[0] + n < self.board_size
                     and self.board[node[0] + n][node[1] + 1] == 2
