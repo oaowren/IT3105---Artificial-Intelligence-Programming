@@ -62,6 +62,9 @@ if __name__ == "__main__":
         episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
         actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
         topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer)
+    elif p.oht:
+        bsa = BasicClientActor()
+        bsa.connect_to_server()
     else:
         epsilon = p.epsilon
         sigma = p.sigma
