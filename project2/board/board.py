@@ -67,7 +67,18 @@ class Board:
                         node[1] + n,
                     ) not in reachable_nodes:  # Check if node is already added to avoid checking the same nodes twice
                         reachable_nodes.append((node[0] + 1, node[1] + n))
-
+            if (0 <= node[1] - 1 < self.board_size
+                # Check node to the left in case this has not been picked up by earlier search
+                and self.board[node[0]][node[1] - 1] == 1):
+                if (node[0],
+                    node[1] - 1) not in reachable_nodes: 
+                        reachable_nodes.append((node[0], node[1] - 1))
+            if (0 <= node[1] + 1 < self.board_size
+                # Check node to the left in case this has not been picked up by earlier search
+                and self.board[node[0]][node[1] + 1] == 1):
+                if (node[0],
+                    node[1] + 1) not in reachable_nodes: 
+                        reachable_nodes.append((node[0], node[1] + 1))
         return False
 
     def check_winning_state_player_two(self):
@@ -85,7 +96,18 @@ class Board:
                         return True
                     if (node[0] + n, node[1] + 1) not in reachable_nodes:
                         reachable_nodes.append((node[0] + n, node[1] + 1))
-
+            if (0 <= node[0] - 1 < self.board_size
+                # Check node to the left in case this has not been picked up by earlier search
+                and self.board[node[0] - 1][node[1]] == 2):
+                if (node[0] - 1,
+                    node[1]) not in reachable_nodes: 
+                        reachable_nodes.append((node[0] - 1, node[1]))
+            if (0 <= node[0] + 1 < self.board_size
+                # Check node to the right in case this has not been picked up by earlier search
+                and self.board[node[0] + 1][node[1]] == 2):
+                if (node[0] + 1,
+                    node[1]) not in reachable_nodes: 
+                        reachable_nodes.append((node[0] + 1, node[1]))
         return False
 
     def check_winning_state(self, player=0):
