@@ -77,8 +77,7 @@ class NeuralNet:
         model.compile(
             optimizer=opt(learning_rate=lr),
             loss=losses,
-            loss_weights=loss_weights,
-            metrics=["accuracy"]
+            loss_weights=loss_weights
         )
         model.summary()
         return model
@@ -92,8 +91,8 @@ class NeuralNet:
             inputs, targets, epochs=epochs, verbose=verbosity, batch_size=batch_size
         )
         e = self.model.evaluate(valid_x, valid_y, verbose=verbosity)
-        if len(e) == 5:
-            print(format('Loss: %.2f\nActor loss: %.2f\nCritic loss: %.2f\nActor accuracy: %.2f\nCritic accuracy:%.2f' % (e[0], e[1], e[2], e[3], e[4])))
+        if len(e) == 3:
+            print(format('Loss: %.2f\nActor loss: %.2f\nCritic loss: %.2f' % (e[0], e[1], e[2])))
 
     def predict(self, inputs):
         predictions = self.model.predict(inputs)
