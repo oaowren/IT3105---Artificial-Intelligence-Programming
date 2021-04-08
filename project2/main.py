@@ -52,15 +52,15 @@ def run_full_game(starting_player):
     nn.fit(inputs, targets, batch_size=p.batch_size)
 
 def check_for_winning_move(board, D, player):
-    if (sum(board.flatten_board(board)) == 0):
+    if (sum(board.flatten_board(board.board)) == 0):
         D = [1.0 if ind == len(D)//2 else 0.0 for ind in range(len(D))]
         return np.array(D)
     for i, p in enumerate(D):
         if p > 0.5:
             board_copy = board.clone()
-            move = NeuralNet.convert_to_2d_move(i)
-            board_copy[move[0]][move[1]] = player
-            if board_copy.check_winning_state(board_copy):
+            move = NeuralNet.convert_to_2d_move(i, board_copy.board_size)
+            board_copy.board[move[0]][move[1]] = player
+            if board_copy.check_winning_state(board_copy.board):
                 D = [1.0 if ind == i else 0.0 for ind in range(len(D))]
                 return np.array(D)
     return D

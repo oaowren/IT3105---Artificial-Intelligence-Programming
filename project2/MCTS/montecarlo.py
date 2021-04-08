@@ -27,7 +27,7 @@ class MCTS:
         node.N += 1
         while node.parent:
             node.parent.N += 1
-            node.parent.Q += (reward - node.Q) / node.N
+            node.parent.Q += (reward - node.parent.Q) / node.N
             node = node.parent
 
     def get_distribution(self):
