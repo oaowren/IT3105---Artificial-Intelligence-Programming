@@ -1,12 +1,15 @@
 import math
 from .BasicClientActorAbs import BasicClientActorAbs
+from NeuralNetwork.neuralnet import NeuralNet
 
 
 class BasicClientActor(BasicClientActorAbs):
-    def __init__(self, actor, IP_address=None, verbose=True):
-        self.actor = actor
+    def __init__(self, IP_address=None, verbose=True):
         self.series_id = -1
         BasicClientActorAbs.__init__(self, IP_address, verbose=verbose)
+
+    def set_actor(self, actor):
+        self.actor = actor
 
     def handle_get_action(self, state):
         """
@@ -36,6 +39,10 @@ class BasicClientActor(BasicClientActorAbs):
 
         """
         self.series_id = series_id
+        print("Games to be played: " + str(num_games))
+        board_size = game_params[0]
+        print("Board size: " + str(board_size))
+        self.actor = NeuralNet(board_size=board_size, load_saved_model=True, episode_number=20)
         #############################
         #
         #

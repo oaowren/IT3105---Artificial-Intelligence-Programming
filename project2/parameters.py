@@ -11,7 +11,7 @@ class Parameters:
         # ANET parameters
         self.lr = 0.001
         self.batch_size = 64
-        self.nn_dims = (10, 64, 9)
+        self.nn_dims = (10, 20, 40, 15, 9)
         self.activation_function = "sigmoid"
         self.optimizer = "adam"
         self.sigma = 2
@@ -20,3 +20,4 @@ class Parameters:
         self.number_of_cached_anet = 5
         self.topp = True
         self.topp_games = 10
+        self.oht = False

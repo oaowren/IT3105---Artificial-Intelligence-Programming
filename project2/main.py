@@ -36,6 +36,7 @@ def run_full_game(starting_player):
             reward = tree.rollout_game(node)
             tree.update(node, reward)
         D = tree.get_distribution()
+        D = check_for_winning_move(board, D, player)
         # Add to replay buffer
         rbuf.append((tree.root, D, tree.root.Q))
         # Select move based on D
@@ -50,12 +51,29 @@ def run_full_game(starting_player):
                "critic_output": critic_target}
     nn.fit(inputs, targets, batch_size=p.batch_size)
 
+def check_for_winning_move(board, D, player):
+    if (sum(board.flatten_board(board)) == 0):
+        D = [1.0 if ind == len(D)//2 else 0.0 for ind in range(len(D))]
+        return np.array(D)
+    for i, p in enumerate(D):
+        if p > 0.5:
+            board_copy = board.clone()
+            move = NeuralNet.convert_to_2d_move(i)
+            board_copy[move[0]][move[1]] = player
+            if board_copy.check_winning_state(board_copy):
+                D = [1.0 if ind == i else 0.0 for ind in range(len(D))]
+                return np.array(D)
+    return D
+
 
 if __name__ == "__main__":
     if (p.topp):
         episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
         actors = [NeuralNet(0, 0, board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
         topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer)
+    elif p.oht:
+        bsa = BasicClientActor()
+        bsa.connect_to_server()
     else:
         for game in range(p.number_of_games):
             if game % save_interval == 0:
