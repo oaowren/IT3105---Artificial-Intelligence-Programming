@@ -18,6 +18,6 @@ class Parameters:
         self.sigma_decay = 0.98
         # TOPP parameters
         self.number_of_cached_anet = 5
-        self.topp = True
+        self.topp = False
         self.topp_games = 10
         self.oht = False

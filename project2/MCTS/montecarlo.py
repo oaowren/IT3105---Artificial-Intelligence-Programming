@@ -48,10 +48,10 @@ class MCTS:
     def get_distribution(self, board):
         moves = [NeuralNet.convert_to_2d_move(i, board.board_size) for i in range(board.board_size ** 2)]
         state = board.get_state()
-        dist = []
-        for move in moves:
-            dist.append((move, self.get_N(state, move)))
-        return dist, self.get_Q_state(state)
+        dist = [self.get_N(state, move) for move in moves]
+        dist = NeuralNet.normalize(np.array(dist))
+        output = [(moves[i], dist[i]) for i in range(len(moves))]
+        return output, self.get_Q_state(state)
 
     def rollout_action(self, board, epsilon, player):
         if random.random() < epsilon:

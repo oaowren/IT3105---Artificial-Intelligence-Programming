@@ -30,6 +30,7 @@ def run_full_game(epsilon, sigma, starting_player):
         sim.initialize_root(tree.root, board.player)
         # Return distribution
         D, Q = sim.sim_games(epsilon, sigma, p.number_of_search_episodes)
+        D = check_for_winning_move(board, D)
         # Parse to state representation
         s = str(board.player) + " " + tree.root
         # Select move based on D
@@ -41,7 +42,7 @@ def run_full_game(epsilon, sigma, starting_player):
     tree.reset()
     # Reset memoization of visited states during rollouts
     inputs = np.array([[int(i) for i in r.split()] for r in rbuf.keys()])
-    actor_target = np.array([softmax([i[1] for i in rbuf[key][0]]) for key in rbuf.keys()])
+    actor_target = np.array([[i[1] for i in rbuf[key][0]] for key in rbuf.keys()])
     critic_target = np.array([[rbuf[key][1]] for key in rbuf.keys()])
     targets = {"actor_output": actor_target,
                "critic_output": critic_target}
@@ -55,6 +56,19 @@ def get_best_move_from_D(D):
             best_move = d[0]
             most_visits = d[1]
     return best_move
+
+def check_for_winning_move(board, D):
+    if (sum(board.flatten_board()) == 0):
+        D = [(el[0], 1.0 if ind == len(D)//2 else 0.0) for ind, el in enumerate(D)]
+        return D
+    for i, el in enumerate(D):
+        if el[1] > 0.5:
+            board_copy = board.clone()
+            board_copy.make_move(el[0])
+            if board_copy.check_winning_state():
+                D = [(el[0], 1.0 if ind == i else 0.0) for ind, el in enumerate(D)]
+                return D
+    return D
 
 
 if __name__ == "__main__":
