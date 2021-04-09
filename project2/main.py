@@ -57,9 +57,14 @@ def check_for_winning_move(board, D, player):
         return np.array(D)
     for i, p in enumerate(D):
         if p > 0.5:
+            move = NeuralNet.convert_to_2d_move(i, board.board_size)
             board_copy = board.clone()
-            move = NeuralNet.convert_to_2d_move(i, board_copy.board_size)
             board_copy.board[move[0]][move[1]] = player
+            if board_copy.check_winning_state(board_copy.board):
+                D = [1.0 if ind == i else 0.0 for ind in range(len(D))]
+                return np.array(D)
+            board_copy = board.clone()
+            board_copy.board[move[0]][move[1]] = player % 2 + 1
             if board_copy.check_winning_state(board_copy.board):
                 D = [1.0 if ind == i else 0.0 for ind in range(len(D))]
                 return np.array(D)
