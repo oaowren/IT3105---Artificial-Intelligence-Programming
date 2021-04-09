@@ -118,7 +118,8 @@ class NeuralNet:
 
     def load_saved_model(self, episode_number):
         model = ks.models.load_model(
-            "project2/models/{0}{1}.h5".format(f"{self.board_size}x{self.board_size}_ep", episode_number)
+            "project2/models/{0}{1}.h5".format(f"{self.board_size}x{self.board_size}_ep", episode_number),
+            compile = False
         )
         print("Model {0}{1} loaded succesfully".format(f"{self.board_size}x{self.board_size}_ep", episode_number))
         return model

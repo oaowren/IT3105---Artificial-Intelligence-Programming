@@ -5,7 +5,7 @@ class Parameters:
         self.starting_player = 0 # 0 for mix
         # MCTS parameters
         self.number_of_games = 50
-        self.number_of_search_episodes = 200
+        self.number_of_search_episodes = 50
         self.epsilon = 1
         self.epsilon_decay = 0.99
         # ANET parameters
@@ -19,6 +19,6 @@ class Parameters:
         self.sigma_decay = 0.97
         # TOPP parameters
         self.number_of_cached_anet = 5
-        self.topp = False
+        self.topp = True
         self.topp_games = 10
         self.oht = False
