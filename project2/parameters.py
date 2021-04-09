@@ -14,10 +14,20 @@ class Parameters:
         self.nn_dims = (10, 20, 40, 15, 9)
         self.activation_function = "sigmoid"
         self.optimizer = "adam"
+<<<<<<< HEAD
         self.sigma = 2
         self.sigma_decay = 1
+=======
+        # With sigma=1.5 and decay=0.97, first chance of critic eval is at episode 1
+        self.sigma = 2
+        self.sigma_decay = 0.99
+>>>>>>> 10165fd6656ae77b8fe92c77e690f51a41f497c0
         # TOPP parameters
         self.number_of_cached_anet = 5
         self.topp = False
         self.topp_games = 10
+<<<<<<< HEAD
         self.oht = False
+=======
+        self.oht = True
+>>>>>>> 10165fd6656ae77b8fe92c77e690f51a41f497c0
