@@ -42,7 +42,8 @@ class BasicClientActor(BasicClientActorAbs):
         print("Games to be played: " + str(num_games))
         board_size = game_params[0]
         print("Board size: " + str(board_size))
-        self.actor = NeuralNet(board_size=board_size, load_saved_model=True, episode_number=20)
+        print("Player no: " + str(series_id))
+        self.actor = NeuralNet(board_size=board_size, load_saved_model=True, episode_number=120)
         #############################
         #
         #

@@ -78,7 +78,7 @@ if __name__ == "__main__":
         actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
         topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer)
     elif p.oht:
-        bsa = BasicClientActor()
+        bsa = BasicClientActor(verbose=False)
         bsa.connect_to_server()
     else:
         epsilon = p.epsilon

@@ -42,7 +42,7 @@ class MCTS:
 
 
     def exploration_bonus(self, state, action):
-        exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state) + 1)/(1 + self.get_N(state,action)))
+        exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state))/(self.get_N(state,action)))
         return exploration_bonus
 
     def get_distribution(self, board):
