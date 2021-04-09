@@ -7,7 +7,7 @@ class Parameters:
         self.number_of_games = 100
         self.number_of_search_episodes = 300
         self.epsilon = 1
-        self.epsilon_decay = 1
+        self.epsilon_decay = 0
         # ANET parameters
         self.lr = 0.001
         self.batch_size = 64
@@ -15,9 +15,9 @@ class Parameters:
         self.activation_function = "sigmoid"
         self.optimizer = "adam"
         self.sigma = 2
-        self.sigma_decay = 1
+        self.sigma_decay = 0.99
         # TOPP parameters
         self.number_of_cached_anet = 5
-        self.topp = False
+        self.topp = True
         self.topp_games = 10
         self.oht = False

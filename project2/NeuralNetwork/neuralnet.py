@@ -99,7 +99,7 @@ class NeuralNet:
             print(format('Loss: %.2f\nActor loss: %.2f\nCritic loss: %.2f' % (e[0], e[1], e[2])))
 
     def predict(self, inputs):
-        predictions = self.model.predict(inputs)
+        predictions = self.model(inputs)
         pred_length = len(predictions[0])
         illegal_moves_removed = np.array(
             [NeuralNet.normalize(np.array([

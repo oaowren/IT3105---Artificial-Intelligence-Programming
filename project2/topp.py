@@ -3,7 +3,7 @@ import numpy as np
 
 class TOPP:
 
-    def run_topp_game(self, board, actor1, actor2, starting_player, board_visualizer, visualize=True):
+    def run_topp_game(self, board, actor1, actor2, starting_player, board_visualizer, visualize=False):
         board.reset_board(starting_player)
         player_no = starting_player
         player = actor1 if player_no == 1 else actor2
@@ -35,7 +35,7 @@ class TOPP:
                 player2 = 0
                 print(f"Actor[{episodes[i]} episodes] vs. actor[{episodes[n]} episodes]")
                 for game in range(topp_games):
-                    winner = self.run_topp_game(board, actors[i], actors[n], game % 2 + 1, visualizer, visualize= game==topp_games - 1)
+                    winner = self.run_topp_game(board, actors[i], actors[n], game % 2 + 1, visualizer)
                     player1 += 1 if winner == 1 else 0
                     player2 += 1 if winner == 2 else 0
                 print(f"Actor[{episodes[i]} episodes] won {player1} times.\nActor[{episodes[n]} episodes] won {player2} times.\n")
