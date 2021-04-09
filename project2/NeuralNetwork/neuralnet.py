@@ -1,5 +1,6 @@
 import random
 from tensorflow import keras as ks
+import tensorflow as tf
 import numpy as np
 
 # Static values used to select activation function
@@ -70,7 +71,7 @@ class NeuralNet:
             )
         model = ks.Model(inputs=x, outputs=[actor_output, critic_output])
         losses = {
-            "actor_output": "kl_divergence",
+            "actor_output": deepnet_cross_entropy,
             "critic_output": "mse",
         }
         loss_weights = {"actor_output": 1.0, "critic_output": 1.0}
@@ -95,7 +96,7 @@ class NeuralNet:
             print(format('Loss: %.2f\nActor loss: %.2f\nCritic loss: %.2f' % (e[0], e[1], e[2])))
 
     def predict(self, inputs):
-        predictions = self.model.predict(inputs)
+        predictions = self.model(inputs)
         pred_length = len(predictions[0])
         illegal_moves_removed = np.array(
             [NeuralNet.normalize(np.array([
@@ -162,3 +163,11 @@ class NeuralNet:
         # Assumes input of 1d np-array
         arrsum = sum(arr)
         return arr/arrsum
+
+
+def safelog(tensor,base=0.0001):
+    return tf.math.log(tf.math.maximum(tensor,base))
+
+def deepnet_cross_entropy(targets,outs):
+    return tf.reduce_mean(tf.reduce_sum(-1 * targets * safelog(outs), axis = [1]))
+
