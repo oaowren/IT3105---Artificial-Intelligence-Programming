@@ -4,8 +4,9 @@ from NeuralNetwork.neuralnet import NeuralNet
 
 
 class BasicClientActor(BasicClientActorAbs):
-    def __init__(self, IP_address=None, verbose=True):
+    def __init__(self, episode_number, IP_address=None, verbose=True):
         self.series_id = -1
+        self.episode_number = episode_number
         BasicClientActorAbs.__init__(self, IP_address, verbose=verbose)
 
     def set_actor(self, actor):
@@ -43,7 +44,7 @@ class BasicClientActor(BasicClientActorAbs):
         board_size = game_params[0]
         print("Board size: " + str(board_size))
         print("Player no: " + str(series_id))
-        self.actor = NeuralNet(board_size=board_size, load_saved_model=True, episode_number=120)
+        self.actor = NeuralNet(board_size=board_size, load_saved_model=True, episode_number=self.episode_number)
         #############################
         #
         #
