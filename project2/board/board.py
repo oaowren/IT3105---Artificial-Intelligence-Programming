@@ -38,13 +38,17 @@ class Board:
         except IndexError:
             return False
 
-    def make_move(self, move):
+    def make_move(self, move, player=None):
+        if player:
+            curplayer = player
+        else: 
+            curplayer = self.player
         if not self.check_legal_move(move):
             raise Exception(f"Illegal move provided: {move} {self.flatten_board()}")
-        if self.player != 1 and self.player != 2:
+        if curplayer != 1 and curplayer != 2:
             raise Exception("player must be either 1 or 2")
-        self.board[move[0]][move[1]] = self.player
-        self.player = self.player % 2 + 1
+        self.board[move[0]][move[1]] = curplayer
+        self.player = curplayer % 2 + 1
 
     def flatten_board(self):
         return self.board.flatten()

@@ -14,9 +14,9 @@ class GameSimulator:
     def initialize_root(self, state, player):
         player = player
         state_split = state.split()
-        state = np.array([[int(i) for i in state_split[n*self.board_size:(n+1)*self.board_size]] for n in range(self.board_size)])
+        board_state = np.array([[int(i) for i in state_split[n*self.board_size:(n+1)*self.board_size]] for n in range(self.board_size)])
         self.board.player = player
-        self.board.board = state
+        self.board.board = board_state
 
 
     def rollout_game(self, epsilon, sigma, board_copy):
@@ -28,21 +28,21 @@ class GameSimulator:
         return board_copy.get_reward(1)
 
     def tree_search(self, board_copy):
-        sequence = self.tree.traverse(board_copy, board_copy.player)
+        sequence = self.tree.traverse(board_copy)
         if not sequence:
             return []
         return sequence
 
     def sim_games(self, epsilon, sigma, number_of_search_games):
         board_copy = self.board.clone()
-        # no_of_legal_moves = len(board_copy.get_legal_moves())
-        # dynamic_range = int(number_of_search_games/(math.log(no_of_legal_moves+2, board_copy.board_size)))
-        for i in range(number_of_search_games):
+        no_of_legal_moves = len(board_copy.get_legal_moves())
+        dynamic_range = int(number_of_search_games/(math.log(no_of_legal_moves+2, board_copy.board_size)))
+        for i in range(dynamic_range):
             sequence = self.tree_search(board_copy)
             self.tree.expand_tree(board_copy)
             reward = self.rollout_game(epsilon, sigma, board_copy)
             for s in sequence:
-                self.tree.update(s[1], s[2], reward)
+                self.tree.update(s[0], s[1], reward)
             board_copy = self.board.clone()
         return self.tree.get_distribution(self.board)
 

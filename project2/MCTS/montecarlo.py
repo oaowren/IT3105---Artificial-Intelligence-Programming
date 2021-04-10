@@ -16,7 +16,6 @@ class MCTS:
         self.state_action = {}
         self.c = 1
         self.nn = nn
-        self.memoized_preds = {}
 
     def update(self, state, action, reward):
         self.states[state]["N"] +=1
@@ -40,7 +39,6 @@ class MCTS:
     def get_Q_state(self, state):
         return self.states[state]["Q"]
 
-
     def exploration_bonus(self, state, action):
         exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state))/(self.get_N(state,action)))
         return exploration_bonus
@@ -57,11 +55,8 @@ class MCTS:
         if random.random() < epsilon:
             return self.random_action(board)
         state = board.get_state()
-        if (player, state) in self.memoized_preds:
-            return self.nn.best_action(self.memoized_preds[(player,state)])
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nn.predict(np.array([split_state]))
-        self.memoized_preds[(player, state)] = preds[0]
         return self.nn.best_action(preds[0])
 
     def critic_evaluate(self, board, player):
@@ -100,16 +95,15 @@ class MCTS:
     def get_min_value_move(self, board, move):
         return self.get_Q(board, move) - self.exploration_bonus(board, move)
 
-    def traverse(self, board, player):
+    def traverse(self, board):
         traversal_sequence = []
         while not board.check_winning_state() and board.get_state() in self.states:
-            move = self.select_action(board, player)
-            traversal_sequence.append((player, board.get_state(), move))
+            move = self.select_action(board, board.player)
+            traversal_sequence.append((board.get_state(), move))
             board.make_move(move)
         return traversal_sequence
 
     def reset(self):
         self.states={}
         self.state_action={}
-        self.memoized_preds = {}
 

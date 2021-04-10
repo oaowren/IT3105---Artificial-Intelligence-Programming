@@ -27,7 +27,7 @@ class TOPP:
             time.sleep(1)
         return winning_player
 
-    def run_topp(self, board, episodes, actors, topp_games, visualizer):
+    def run_topp(self, board, episodes, actors, topp_games, visualizer, visualize_last_game=True):
         actorscore = [0 for _ in episodes]
         for i in range(len(actors)):
             for n in range(i+1, len(actors)):
@@ -35,7 +35,7 @@ class TOPP:
                 player2 = 0
                 print(f"Actor[{episodes[i]} episodes] vs. actor[{episodes[n]} episodes]")
                 for game in range(topp_games):
-                    winner = self.run_topp_game(board, actors[i], actors[n], game % 2 + 1, visualizer, visualize= game==topp_games - 1)
+                    winner = self.run_topp_game(board, actors[i], actors[n], game % 2 + 1, visualizer, visualize= visualize_last_game and game==topp_games - 1)
                     player1 += 1 if winner == 1 else 0
                     player2 += 1 if winner == 2 else 0
                 print(f"Actor[{episodes[i]} episodes] won {player1} times.\nActor[{episodes[n]} episodes] won {player2} times.\n")

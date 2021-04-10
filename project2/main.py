@@ -64,8 +64,15 @@ def check_for_winning_move(board, D):
     for i, el in enumerate(D):
         # Set limit at 0.5 as this means this move will be taken based on D no matter what, increase the weight for rbuf
         if el[1] > 0.5:
+            # Check for winning move
             board_copy = board.clone()
             board_copy.make_move(el[0])
+            if board_copy.check_winning_state():
+                D = [(el[0], 1.0 if ind == i else 0.0) for ind, el in enumerate(D)]
+                return D
+            # Check for opponent winning move
+            board_copy = board.clone()
+            board_copy.make_move(el[0], board_copy.player % 2 + 1)
             if board_copy.check_winning_state():
                 D = [(el[0], 1.0 if ind == i else 0.0) for ind, el in enumerate(D)]
                 return D
@@ -76,7 +83,7 @@ if __name__ == "__main__":
     if (p.topp):
         episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
         actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
-        topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer)
+        topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer, visualize_last_game=p.visualize_last_game)
     elif p.oht:
         bsa = BasicClientActor(p.oht_episode, verbose=False)
         bsa.connect_to_server()

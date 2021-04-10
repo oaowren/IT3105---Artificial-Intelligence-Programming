@@ -72,7 +72,7 @@ class NeuralNet:
         model = ks.Model(inputs=x, outputs=[actor_output, critic_output])
         losses = {
             "actor_output": deepnet_cross_entropy,
-            "critic_output": "mse",
+            "critic_output": "hinge",
         }
         loss_weights = {"actor_output": 1.0, "critic_output": 1.0}
         model.compile(
@@ -110,7 +110,8 @@ class NeuralNet:
 
     def best_action(self, normalized_predictions):
         i = np.argmax(normalized_predictions[0])
-        return NeuralNet.convert_to_2d_move(i, self.board_size)
+        move=NeuralNet.convert_to_2d_move(i, self.board_size)
+        return move
 
     def save_model(self, model_name, episode_number):
         self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
