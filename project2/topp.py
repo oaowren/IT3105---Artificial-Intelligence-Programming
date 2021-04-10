@@ -35,7 +35,7 @@ class TOPP:
                 player2 = 0
                 print(f"Actor[{episodes[i]} episodes] vs. actor[{episodes[n]} episodes]")
                 for game in range(topp_games):
-                    winner = self.run_topp_game(board, actors[i], actors[n], game % 2 + 1, visualizer)
+                    winner = self.run_topp_game(board, actors[i], actors[n], game % 2 + 1, visualizer, visualize=game == topp_games-1)
                     player1 += 1 if winner == 1 else 0
                     player2 += 1 if winner == 2 else 0
                 print(f"Actor[{episodes[i]} episodes] won {player1} times.\nActor[{episodes[n]} episodes] won {player2} times.\n")
