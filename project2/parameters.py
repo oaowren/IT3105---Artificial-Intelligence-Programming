@@ -19,7 +19,7 @@ class Parameters:
         self.sigma_decay = 0.985
         # TOPP parameters
         self.number_of_cached_anet = 5
-        self.topp = True
+        self.topp = False
         self.topp_games = 4
         self.visualize_last_game = False
         # Whether or not to play OHT

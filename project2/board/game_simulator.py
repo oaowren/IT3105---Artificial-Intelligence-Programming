@@ -18,7 +18,6 @@ class GameSimulator:
         self.board.player = player
         self.board.board = board_state
 
-
     def rollout_game(self, epsilon, sigma, board_copy):
         if random.uniform(0,1) > sigma:
             return self.tree.critic_evaluate(board_copy, board_copy.player)

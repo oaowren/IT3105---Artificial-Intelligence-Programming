@@ -6,7 +6,6 @@ from board.board_visualizer import BoardVisualizer
 from board.game_simulator import GameSimulator
 from Client_side.BasicClientActor import BasicClientActor
 from MCTS.montecarlo import MCTS
-from scipy.special import softmax
 import numpy as np
 
 p = Parameters()
@@ -19,6 +18,10 @@ board_visualizer = BoardVisualizer()
 tree = MCTS((p.starting_player, board.get_state()), nn)
 sim = GameSimulator(board, p.board_size, p.starting_player, tree)
 topp = TOPP()
+
+# TODO: Flytt logikk ut fra game_simulator til mcts, se om roten har noe nytte
+# Board kan gjøres statisk og ta inn [[], []] - board i stedet
+
 
 
 def run_full_game(epsilon, sigma, starting_player):
