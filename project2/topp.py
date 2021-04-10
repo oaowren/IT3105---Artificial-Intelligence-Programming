@@ -9,7 +9,7 @@ class TOPP:
         player = actor1 if player_no == 1 else actor2
         if visualize:
             board_visualizer.draw_board(board.board)
-            time.sleep(1)
+            time.sleep(0.5)
         while not board.check_winning_state():
             split_state = np.concatenate(([player_no], [int(i) for i in board.get_state().split()]))
             preds = player.predict(np.array([split_state]))[0]
@@ -19,12 +19,12 @@ class TOPP:
             player = player = actor1 if player_no == 1 else actor2
             if visualize:
                 board_visualizer.draw_board(board.board)
-                time.sleep(1)
+                time.sleep(0.5)
         winning_player = 1 if board.check_winning_state_player_one() else 2
         print(f'Player {winning_player} wins!')
         if visualize:
             board_visualizer.draw_board(board.board)
-            time.sleep(1)
+            time.sleep(0.5)
         return winning_player
 
     def run_topp(self, board, episodes, actors, topp_games, visualizer, visualize_last_game=True):

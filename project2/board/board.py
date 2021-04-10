@@ -137,11 +137,11 @@ class Board:
             for i in row:
                 if i == player:
                     discount += 1
-        if (player == 1 and self.check_winning_state_player_one()) \
-            or (player == 2 and self.check_winning_state_player_two()):
-            return self.board_size / discount
+        reward = self.board_size / discount
+        if (self.check_winning_state_player_one()):
+            return reward
         else:
-            return -self.board_size / discount
+            return -reward
 
     def clone(self):
         return deepcopy(self)

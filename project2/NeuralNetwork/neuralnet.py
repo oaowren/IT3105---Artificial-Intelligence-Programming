@@ -164,6 +164,8 @@ class NeuralNet:
     def normalize(arr):
         # Assumes input of 1d np-array
         arrsum = sum(arr)
+        if arrsum == 0:
+            return arr
         return arr/arrsum
 
 

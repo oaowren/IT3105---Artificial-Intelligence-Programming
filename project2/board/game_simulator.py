@@ -41,6 +41,7 @@ class GameSimulator:
             sequence = self.tree_search(board_copy)
             self.tree.expand_tree(board_copy)
             reward = self.rollout_game(epsilon, sigma, board_copy)
+            sequence.reverse()
             for s in sequence:
                 self.tree.update(s[0], s[1], reward)
             board_copy = self.board.clone()
