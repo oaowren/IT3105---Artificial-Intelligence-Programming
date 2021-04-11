@@ -1,3 +1,4 @@
+import math
 from NeuralNetwork.neuralnet import NeuralNet
 import random
 """
@@ -39,6 +40,8 @@ class MCTS:
         return self.states[state]["Q"]
 
     def exploration_bonus(self, state, action):
+        if self.get_N(state) == 0:
+            return math.inf
         exploration_bonus =self.c*np.sqrt(np.log(self.get_N(state))/(1 + self.get_N(state,action)))
         return exploration_bonus
 
@@ -83,13 +86,10 @@ class MCTS:
         moves = board.get_legal_moves()
         if(player == 1):
             values = [self.get_max_value_move(state, move) for move in moves]
-            indices = [i for i in range(len(values)) if values[i] == max(values)]
+            index = values.index(max(values))
         else:
             values = [self.get_min_value_move(state, move) for move in moves]
-            indices = [i for i in range(len(values)) if values[i] == min(values)]
-        if len(indices) == 0:
-            indices = [i for i in range(len(values))]
-        index = random.choice(indices)
+            index = values.index(min(values))
         return moves[index]
 
     def get_max_value_move(self, board, move):
