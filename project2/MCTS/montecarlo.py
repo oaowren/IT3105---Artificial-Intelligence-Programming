@@ -20,7 +20,7 @@ class MCTS:
     def update(self, state, action, reward):
         self.states[state]["N"] +=1
         self.state_action[(state,action)]["N"] +=1
-        self.states[state]["Q"] += (reward - self.get_Q_state(state))/(1 + self.get_N(state, action))
+        self.states[state]["Q"] += (reward - self.get_Q(state))/(1 + self.get_N(state, action))
         self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/(1 + self.get_N(state, action))
         return
 
@@ -33,10 +33,9 @@ class MCTS:
             self.states[state] = {"N":0, "Q": 0}
         return self.states[state]["N"]
 
-    def get_Q(self, state, action):
-        return self.state_action[(state,action)]["Q"]
-
-    def get_Q_state(self, state):
+    def get_Q(self, state, action=None):
+        if action:
+            return self.state_action[(state,action)]["Q"]
         return self.states[state]["Q"]
 
     def exploration_bonus(self, state, action):
@@ -49,7 +48,7 @@ class MCTS:
         dist = [self.get_N(state, move) for move in moves]
         dist = NeuralNet.normalize(np.array(dist))
         output = [(moves[i], dist[i]) for i in range(len(moves))]
-        return output, self.get_Q_state(state)
+        return output, self.get_Q(state)
 
     def rollout_action(self, board, epsilon, player):
         if random.random() < epsilon:
@@ -69,12 +68,13 @@ class MCTS:
         return random.choice(board.get_legal_moves())
 
     def expand_tree(self, board):
+        if board.check_winning_state():
+            return
         state = board.get_state()
         legal_moves = board.get_legal_moves()
-        self.states[state] = {"N":0, "Q": 0}
+        if state not in self.states:
+            self.states[state] = {"N":0, "Q": 0}
         for move in legal_moves:
-            board_copy = board.clone()
-            board_copy.make_move(move)
             self.state_action[(state, move)] = {"N": 0, "Q": 0}
 
     def select_action(self, board, player):
@@ -83,10 +83,13 @@ class MCTS:
         moves = board.get_legal_moves()
         if(player == 1):
             values = [self.get_max_value_move(state, move) for move in moves]
-            index = values.index(max(values))
+            indices = [i for i in range(len(values)) if values[i] == max(values)]
         else:
             values = [self.get_min_value_move(state, move) for move in moves]
-            index = values.index(min(values))
+            indices = [i for i in range(len(values)) if values[i] == min(values)]
+        if len(indices) == 0:
+            indices = [i for i in range(len(values))]
+        index = random.choice(indices)
         return moves[index]
 
     def get_max_value_move(self, board, move):

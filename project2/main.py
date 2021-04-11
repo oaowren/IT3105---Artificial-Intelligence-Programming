@@ -15,7 +15,7 @@ rbuf = {}
 nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size, p.starting_player)
 board_visualizer = BoardVisualizer()
-tree = MCTS((p.starting_player, board.get_state()), nn)
+tree = MCTS(board.get_state(), nn)
 sim = GameSimulator(board, p.board_size, p.starting_player, tree)
 topp = TOPP()
 
