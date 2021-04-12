@@ -1,14 +1,14 @@
+from utils import Utils
 from board.board import Board
-from NeuralNetwork.neuralnet import NeuralNet
 
 import random
+import numpy as np
 """
 Dette er hovedsaklig basert på algoritmen fra
 http://www.cs.cornell.edu/courses/cs6700/2016sp/lectures/CS6700-UCT.pdf
 side 5-7.
 """
 
-import numpy as np
 
 class MCTS:
 
@@ -17,7 +17,6 @@ class MCTS:
         self.root = None
         self.c = c
         self.actor = actor
-        self.memoized_preds = {}
 
     def set_root(self, node):
         self.root = node
@@ -25,9 +24,9 @@ class MCTS:
     def update(self, goal_node, reward):
         node = goal_node
         node.N += 1
-        while node.parent:
+        while node != self.root:
             node.parent.N += 1
-            node.parent.Q += (reward - node.parent.Q) / node.N
+            node.Q += (reward - node.Q) / node.N
             node = node.parent
 
     def get_distribution(self):
@@ -37,25 +36,24 @@ class MCTS:
         for child in children:
             index = child.action[0] * size + child.action[1]
             dist[index] += child.N
-        return NeuralNet.normalize(dist)
+        return Utils.normalize(dist)
 
     def rollout_game(self, node):
         current_state, player = node.state, node.player
         reward = 0
         if random.random() > self.actor.sigma:
-            reward = self.actor.get_critic_eval(self.board.flatten_board(current_state), player)
+            reward = self.actor.get_critic_eval(Utils.flatten_board(current_state), player)
         else:
             while not self.board.check_winning_state(current_state):
                 action = None
                 if random.random() < self.actor.epsilon:
                     action = self.random_action(current_state)
                 else:
-                    preds = self.actor.get_actor_eval(self.board.flatten_board(current_state), player)
+                    preds = self.actor.get_actor_eval(Utils.flatten_board(current_state), player)
                     action = self.actor.best_action(preds)
                 current_state = self.board.get_next_state(current_state, action, player)
                 player = player % 2 + 1
-            winner = player % 2 + 1
-            reward = 1 if winner == 1 else -1
+            reward = self.board.get_reward(current_state)
         return reward
 
     def random_action(self, state):
@@ -65,10 +63,8 @@ class MCTS:
         if self.board.check_winning_state(node.state):
             return node
         node.children = self.board.get_child_states(node.player, node.state)
-        child_player = node.player % 2 + 1
         for child in node.children:
-            child.player = child_player
-            child.parent = node
+            child.set_parent(node)
         return node
 
     def select_action(self, root):
@@ -83,7 +79,8 @@ class MCTS:
 
     def get_value_move(self, node, player):
         c = self.c if player == 1 else -self.c
-        return node.Q + c * np.sqrt(np.log(node.parent.N)/(1 + node.N))
+        val = node.Q + c * np.sqrt(np.log(node.parent.N)/(1 + node.N))
+        return val
 
     def traverse(self):
         root = self.root
@@ -93,9 +90,13 @@ class MCTS:
             children = root.get_children()
         return root
 
-    def get_best_move(self):
-        children = [(child, child.N) for child in self.root.children]
-        node, N = max(children, key=lambda x: x[1])
-        return node
+    def get_best_move(self, distribution):
+        index = np.argmax(distribution)
+        return Utils.convert_to_2d_move(index, self.board.board_size)
+
+    def get_node_from_move(self, node, move):
+        for child in node.children:
+            if child.action == move:
+                return child
 
 

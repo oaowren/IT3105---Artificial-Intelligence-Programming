@@ -1,5 +1,7 @@
 from copy import copy
 import math
+from rbuf import RBUF
+from utils import Utils
 from MCTS.node import Node
 from topp import TOPP
 from NeuralNetwork.neuralnet import NeuralNet
@@ -13,7 +15,7 @@ import numpy as np
 p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
 save_interval = p.number_of_games // p.number_of_cached_anet
-rbuf = []
+rbuf = RBUF()
 nn = NeuralNet(p.epsilon, p.sigma, p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size, p.starting_player)
 board_visualizer = BoardVisualizer()
@@ -26,8 +28,8 @@ def run_full_game(starting_player):
     tree = MCTS(nn, p.board_size, starting_player)
     tree.set_root(Node(copy(board.board), None, starting_player))
     player = starting_player
+    next_node = tree.root
     while not board.check_winning_state(board.board):
-        # Return distribution
         no_of_legal_moves = len(board.get_legal_moves(board.board))
         dynamic_range = int(p.number_of_search_episodes/(math.log(no_of_legal_moves+2, p.board_size)))
         for i in range(dynamic_range):
@@ -38,43 +40,40 @@ def run_full_game(starting_player):
         D = tree.get_distribution()
         D = check_for_winning_move(board, D, player)
         # Add to replay buffer
-        rbuf.append((tree.root, D, tree.root.Q))
+        rbuf.add((tree.root, D, tree.root.Q))
         # Select move based on D
-        next_node = tree.get_best_move()
-        board.make_move(next_node.action, player)
+        next_move = tree.get_best_move(D)
+        next_node = tree.get_node_from_move(next_node, next_move)
+        board.make_move(next_move, player)
         player = player % 2 + 1
         tree.set_root(next_node)
-    inputs = np.array([np.concatenate(([r[0].player], board.flatten_board(r[0].state))) for r in rbuf])
-    actor_target = np.array([r[1] for r in rbuf])
-    critic_target = np.array([r[2] for r in rbuf])
-    targets = {"actor_output": actor_target,
-               "critic_output": critic_target}
-    nn.fit(inputs, targets, batch_size=p.batch_size)
+    nn.fit(rbuf.get_random_batch(p.batch_size))
 
 def check_for_winning_move(board, D, player):
-    if (sum(board.flatten_board(board.board)) == 0):
-        D = [1.0 if ind == len(D)//2 else 0.0 for ind in range(len(D))]
+    if (sum(Utils.flatten_board(board.board)) == 0):
+        index = Utils.get_mid_index(board.board_size)
+        D = [1.0 if ind == index else 0.0 for ind in range(len(D))]
         return np.array(D)
     for i, p in enumerate(D):
         if p > 0.5:
-            move = NeuralNet.convert_to_2d_move(i, board.board_size)
+            move = Utils.convert_to_2d_move(i, board.board_size)
             board_copy = board.clone()
             board_copy.board[move[0]][move[1]] = player
             if board_copy.check_winning_state(board_copy.board):
                 D = [1.0 if ind == i else 0.0 for ind in range(len(D))]
                 return np.array(D)
-            board_copy = board.clone()
-            board_copy.board[move[0]][move[1]] = player % 2 + 1
-            if board_copy.check_winning_state(board_copy.board):
-                D = [1.0 if ind == i else 0.0 for ind in range(len(D))]
-                return np.array(D)
+            # board_copy = board.clone()
+            # board_copy.board[move[0]][move[1]] = player % 2 + 1
+            # if board_copy.check_winning_state(board_copy.board):
+            #     D = [1.0 if ind == i else 0.0 for ind in range(len(D))]
+            #     return np.array(D)
     return D
 
 
 if __name__ == "__main__":
     if (p.topp):
-        episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
-        actors = [NeuralNet(0, 0, board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
+        episodes = [i*save_interval for i in range(p.number_of_cached_anet, -1, -1)]
+        actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
         topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer)
     elif p.oht:
         bsa = BasicClientActor(verbose=False)

@@ -90,7 +90,7 @@ def convert_diamond_board_shape(board):
 
     will return this:
     [[1],
-    [2,3],
+    [3,2],
     [4]]
     """
 

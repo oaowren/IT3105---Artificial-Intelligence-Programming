@@ -1,6 +1,7 @@
 import math
 from .BasicClientActorAbs import BasicClientActorAbs
 from NeuralNetwork.neuralnet import NeuralNet
+import numpy as np
 
 
 class BasicClientActor(BasicClientActorAbs):
@@ -21,7 +22,7 @@ class BasicClientActor(BasicClientActorAbs):
         then you will see a 2 here throughout the entire series, whereas player 1 will see a 1.
         :return: Your actor's selected action as a tuple (row, column)
         """
-        preds = self.actor.predict([state])[0]
+        preds = self.actor.predict(np.array([state]))[0]
         next_move = self.actor.best_action(preds)
         return next_move
 
@@ -43,7 +44,7 @@ class BasicClientActor(BasicClientActorAbs):
         board_size = game_params[0]
         print("Board size: " + str(board_size))
         print("Player no: " + str(series_id))
-        self.actor = NeuralNet(board_size=board_size, load_saved_model=True, episode_number=100)
+        self.actor = NeuralNet(board_size=board_size, load_saved_model=True, episode_number=150)
         #############################
         #
         #

@@ -1,5 +1,6 @@
 import time
 import numpy as np
+from utils import Utils
 
 class TOPP:
 
@@ -9,22 +10,22 @@ class TOPP:
         player = actor1 if player_no == 1 else actor2
         if visualize:
             board_visualizer.draw_board(board.board)
-            time.sleep(1)
+            time.sleep(0.5)
         while not board.check_winning_state(board.board):
-            split_state = np.concatenate(([player_no], [int(i) for i in board.get_state().split()]))
-            preds = player.predict(np.array([split_state]))[0]
+            split_state = np.concatenate(([player_no], Utils.flatten_board(board.board)))
+            preds = player.predict(np.array([split_state]))
             move = player.best_action(preds)
             board.make_move(move, player_no)
             player_no = player_no % 2 + 1
-            player = player = actor1 if player_no == 1 else actor2
+            player = actor1 if player_no == 1 else actor2
             if visualize:
                 board_visualizer.draw_board(board.board)
-                time.sleep(1)
+                time.sleep(0.5)
         winning_player = 1 if board.check_winning_state_player_one(board.board) else 2
         print(f'Player {winning_player} wins!')
         if visualize:
             board_visualizer.draw_board(board.board)
-            time.sleep(1)
+            time.sleep(0.5)
         return winning_player
 
     def run_topp(self, board, episodes, actors, topp_games, visualizer):

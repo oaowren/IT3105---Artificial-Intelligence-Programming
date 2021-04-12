@@ -1,5 +1,6 @@
-import random
+from utils import Utils
 from tensorflow import keras as ks
+import tensorflow as tf
 import numpy as np
 
 # Static values used to select activation function
@@ -22,8 +23,8 @@ optimizers = {
 class NeuralNet:
     def __init__(
         self,
-        epsilon,
-        sigma,
+        epsilon = 0,
+        sigma = 0,
         nn_dims = (10),
         board_size = 3,
         lr = 0.01,
@@ -35,6 +36,11 @@ class NeuralNet:
         self.epsilon = epsilon
         self.sigma = sigma
         self.board_size = board_size
+        temp_opt = optimizers.get(optimizer, None)
+        self.opt = temp_opt(learning_rate=lr)
+        self.activation = acts.get(activation, None)
+        self.actor_loss = ks.losses.CategoricalCrossentropy()
+        self.critic_loss = ks.losses.MeanSquaredError()
         if load_saved_model:
             try:
                 self.model = self.load_saved_model(episode_number)
@@ -43,12 +49,11 @@ class NeuralNet:
                     "Failed to load model named {0}{1}, did you provide episode number?".format(f"{self.board_size}x{self.board_size}_ep", episode_number)
                 )
         else:
-            self.model = self.init_model(nn_dims, board_size, lr, activation, optimizer)
+            self.model = self.init_model(nn_dims, board_size)
         self.topp = load_saved_model
 
-    def init_model(self, nn_dims, board_size, lr, activation, optimizer):
-        activation_function = acts.get(activation, None)
-        if activation_function is None:
+    def init_model(self, nn_dims, board_size):
+        if self.activation is None:
             raise ValueError(
                 "Invalid activation function provided (must be either '{0}')".format(
                     "', '".join(acts.keys())
@@ -57,16 +62,15 @@ class NeuralNet:
         x = ks.layers.Input(shape=(board_size ** 2 + 1))
         input_layer = x
         # Ensure that input has correct shape
-        input_layer = ks.layers.Dense(board_size ** 2 + 1, activation=activation_function)(input_layer)
+        input_layer = ks.layers.Dense(board_size ** 2 + 1, activation=self.activation)(input_layer)
         for i in nn_dims:
-            input_layer = ks.layers.Dense(i, activation=activation_function)(input_layer)
+            input_layer = ks.layers.Dense(i, activation=self.activation)(input_layer)
         # Ensure that output has correct shape and activation softmax
         actor_output = ks.layers.Dense(board_size ** 2)(input_layer)
         actor_output = ks.layers.Activation(activation="softmax", name="actor_output")(actor_output)
         critic_output = ks.layers.Dense(1)(input_layer)
-        critic_output = ks.layers.Activation(activation="linear", name="critic_output")(critic_output)
-        opt = optimizers.get(optimizer, None)
-        if opt is None:
+        critic_output = ks.layers.Activation(activation="tanh", name="critic_output")(critic_output)
+        if self.opt is None:
             raise ValueError(
                 "Invalid optimizer provided (must be either '{0}')".format(
                     "', '".join(optimizers.keys())
@@ -74,35 +78,32 @@ class NeuralNet:
             )
         model = ks.Model(inputs=x, outputs=[actor_output, critic_output])
         losses = {
-            "actor_output": "kl_divergence",
-            "critic_output": "mse",
+            "actor_output": self.actor_loss,
+            "critic_output": self.critic_loss,
         }
         loss_weights = {"actor_output": 1.0, "critic_output": 1.0}
         model.compile(
-            optimizer=opt(learning_rate=lr),
+            optimizer=self.opt,
             loss=losses,
             loss_weights=loss_weights
         )
         model.summary()
         return model
 
-    def fit(self, inputs, targets, batch_size=64, epochs=1, verbosity=0):
+    def fit(self, batch):
         if self.topp:
             raise Exception("Model should not train during TOPP")
-        train_x, train_y, valid_x, valid_y = self.train_test_split(inputs, targets)
-        train_x, train_y = self.random_minibatch(train_x, train_y, batch_size)
-        self.model.fit(
-            inputs, targets, epochs=epochs, verbose=verbosity, batch_size=batch_size
-        )
-        e = self.model.evaluate(valid_x, valid_y, verbose=verbosity)
-        if len(e) == 3:
-            print(format('Loss: %.2f\nActor loss: %.2f\nCritic loss: %.2f' % (e[0], e[1], e[2])))
+        inputs = np.array([np.concatenate(([node.player], Utils.flatten_board(node.state))) for node, _, _ in batch])
+        actor_target = np.array([r[1] for r in batch])
+        critic_target = np.array([r[2] for r in batch])
+        targets = {"actor_output":actor_target, "critic_output":critic_target}
+        self.model.fit(inputs, targets, verbose=1, batch_size=64)
 
     def predict(self, inputs):
         predictions = self.model(inputs)
         pred_length = len(predictions[0])
         illegal_moves_removed = np.array(
-            [NeuralNet.normalize(np.array([
+            [Utils.normalize(np.array([
                 predictions[0][n][i] if inputs[0][i+1] == 0 else 0
                 for i in range(len(predictions[0][n]))
             ]))
@@ -123,56 +124,21 @@ class NeuralNet:
 
     def best_action(self, normalized_predictions):
         i = np.argmax(normalized_predictions[0])
-        return NeuralNet.convert_to_2d_move(i, self.board_size)
+        return Utils.convert_to_2d_move(i, self.board_size)
 
     def save_model(self, model_name, episode_number):
-        self.model.save("project2/models/{0}{1}.h5".format(model_name, episode_number))
+        self.model.save("project2/models/{0}{1}.keras".format(model_name, episode_number))
         print("Model {0}{1} saved succesfully".format(model_name, episode_number))
 
     def load_saved_model(self, episode_number):
         model = ks.models.load_model(
-            "project2/models/{0}{1}.h5".format(f"{self.board_size}x{self.board_size}_ep", episode_number)
+            "project2/models/{0}{1}.keras".format(f"{self.board_size}x{self.board_size}_ep", episode_number), compile=False
         )
         print("Model {0}{1} loaded succesfully".format(f"{self.board_size}x{self.board_size}_ep", episode_number))
         return model
 
-    def random_minibatch(self, inputs, targets, size=10):
-        if (size >= len(inputs)):
-            return inputs, targets
-        weight = np.linspace(0, 1, len(inputs))
-        index = [i for i in range(len(inputs))]
-        indices = np.array(random.choices(index, weights=weight, k=size))
-        actor_targets = targets["actor_output"][indices]
-        critic_targets = targets["critic_output"][indices]
-        return inputs[indices], {"actor_output": actor_targets, "critic_output": critic_targets}
+def safelog(tensor,base=0.0001):
+    return tf.math.log(tf.math.maximum(tensor,base))
 
-    def train_test_split(self, inputs, targets, split=0.1, randomize=True):
-        vc = round(split * len(inputs))
-        actor_targets = targets["actor_output"]
-        critic_targets = targets["critic_output"]
-        if split > 0:
-            pairs = list(zip(inputs, actor_targets, critic_targets))
-            if randomize:
-                np.random.shuffle(pairs)
-            vcases = pairs[0:vc]
-            tcases = pairs[vc:]
-            return (
-                np.array([tc[0] for tc in tcases]),
-                {"actor_output": np.array([tc[1] for tc in tcases]),
-                 "critic_output": np.array([tc[2] for tc in tcases])},
-                np.array([vc[0] for vc in vcases]),
-                {"actor_output": np.array([vc[1] for vc in vcases]),
-                 "critic_output": np.array([vc[2] for vc in vcases])},
-            )
-        else:
-            return inputs, targets, [], {"actor_output":[], "critic_output":[]}
-
-    @staticmethod
-    def convert_to_2d_move(index, board_size):
-        return (index//board_size, index % board_size)
-
-    @staticmethod
-    def normalize(arr):
-        # Assumes input of 1d np-array
-        arrsum = sum(arr)
-        return arr/arrsum
+def deepnet_cross_entropy(targets,outs):
+    return tf.reduce_mean(tf.reduce_sum(-1 * targets * tf.nn.log_softmax(outs), axis = -1))
