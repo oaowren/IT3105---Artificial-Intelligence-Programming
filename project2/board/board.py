@@ -141,7 +141,7 @@ class Board:
         if (self.check_winning_state_player_one()):
             return reward
         else:
-            return -reward
+            return - reward
 
     def clone(self):
         return deepcopy(self)

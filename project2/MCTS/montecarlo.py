@@ -21,7 +21,7 @@ class MCTS:
     def update(self, state, action, reward):
         self.states[state]["N"] +=1
         self.state_action[(state,action)]["N"] +=1
-        self.states[state]["Q"] += (reward - self.get_Q(state))/(1 + self.get_N(state, action))
+        self.states[state]["Q"] += (reward - self.get_Q(state))/(1 + self.get_N(state))
         self.state_action[(state,action)]["Q"] += (reward - self.get_Q(state, action))/(1 + self.get_N(state, action))
         return
 

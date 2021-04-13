@@ -1,3 +1,4 @@
+from rbuf import RBUF
 from topp import TOPP
 from NeuralNetwork.neuralnet import NeuralNet
 from parameters import Parameters
@@ -11,7 +12,7 @@ import numpy as np
 p = Parameters()
 # Initialize save interval, RBUF, ANET and board (state manager)
 save_interval = p.number_of_games // p.number_of_cached_anet
-rbuf = {}
+rbuf = RBUF()
 nn = NeuralNet(p.nn_dims, p.board_size, p.lr, p.activation_function, p.optimizer)
 board = Board(p.board_size, p.starting_player)
 board_visualizer = BoardVisualizer()
@@ -39,17 +40,12 @@ def run_full_game(epsilon, sigma, starting_player):
         # Select move based on D
         next_move = get_best_move_from_D(D)
         # Add to replay buffer
-        rbuf[s] = (D, Q)
+        rbuf.add((s, D, Q))
         board.make_move(next_move)
         sim.reset(board.player)
     tree.reset()
     # Reset memoization of visited states during rollouts
-    inputs = np.array([[int(i) for i in r.split()] for r in rbuf.keys()])
-    actor_target = np.array([[i[1] for i in rbuf[key][0]] for key in rbuf.keys()])
-    critic_target = np.array([[rbuf[key][1]] for key in rbuf.keys()])
-    targets = {"actor_output": actor_target,
-               "critic_output": critic_target}
-    nn.fit(inputs, targets, batch_size=p.batch_size)
+    nn.fit(rbuf.get_random_batch(p.batch_size))
 
 def get_best_move_from_D(D):
     best_move = None
