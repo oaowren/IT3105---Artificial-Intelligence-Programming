@@ -1,11 +1,11 @@
 class Parameters:
     def __init__(self):
         # Board parameters
-        self.board_size = 6
+        self.board_size = 5
         self.starting_player = 0 # 0 for mix
         # MCTS parameters
         self.number_of_games = 200
-        self.number_of_search_episodes = 500
+        self.number_of_search_episodes = 600
         self.epsilon = 1
         self.epsilon_decay = 0.99
         # ANET parameters
@@ -19,10 +19,10 @@ class Parameters:
         self.sigma_decay = 0.996
         # TOPP parameters
         self.number_of_cached_anet = 5 # + 1 for episode 0
-        self.topp = False
+        self.topp = True
         self.topp_games = 4
-        self.visualize_last_game = False
+        self.visualize_last_game = True
         # Whether or not to play OHT
-        self.oht = True
+        self.oht = False
         # Episode number of actor to play OHT
         self.oht_episode = 160
