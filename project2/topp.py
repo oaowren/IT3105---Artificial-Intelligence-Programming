@@ -50,6 +50,7 @@ class TOPP:
                     player1 += 1 if winner == 1 else 0
                     player2 += 1 if winner == 2 else 0
                 print(f"Actor[{episodes[i]} episodes] won {player1} times.\nActor[{episodes[n]} episodes] won {player2} times.\n")
+                actorscore[i]+=player1
         print("--------- FINAL SCORES AS PLAYER 1 --------")
         for i in range(len(episodes)):
             print(f"Actor[{episodes[i]} episodes]: {actorscore[i]} wins")
