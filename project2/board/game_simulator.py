@@ -36,7 +36,7 @@ class GameSimulator:
         board_copy = self.board.clone()
         no_of_legal_moves = len(board_copy.get_legal_moves())
         dynamic_range = int(number_of_search_games/no_of_legal_moves)
-        for i in range(dynamic_range):
+        for i in range(max((dynamic_range, 10))):
             sequence = self.tree_search(board_copy)
             self.tree.expand_tree(board_copy)
             reward = self.rollout_game(epsilon, sigma, board_copy)

@@ -20,11 +20,6 @@ tree = MCTS(board.get_state(), nn)
 sim = GameSimulator(board, p.board_size, p.starting_player, tree)
 topp = TOPP()
 
-# TODO: Flytt logikk ut fra game_simulator til mcts, se om roten har noe nytte
-# Board kan gjøres statisk og ta inn [[], []] - board i stedet
-
-
-
 def run_full_game(epsilon, sigma, starting_player):
     # Starting state
     board.reset_board(starting_player)
@@ -80,7 +75,7 @@ def check_for_winning_move(board, D):
 
 if __name__ == "__main__":
     if (p.topp):
-        episodes = [i*save_interval for i in range(p.number_of_cached_anet + 1)]
+        episodes = [i*save_interval for i in range(p.number_of_cached_anet +1)]
         actors = [NeuralNet(board_size=p.board_size, load_saved_model=True, episode_number=i) for i in episodes]
         topp.run_topp(board, episodes, actors, p.topp_games, board_visualizer, visualize_last_game=p.visualize_last_game)
     elif p.oht:
