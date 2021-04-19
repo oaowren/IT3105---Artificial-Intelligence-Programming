@@ -137,7 +137,7 @@ class Board:
             for i in row:
                 if i == player:
                     discount += 1
-        reward = self.board_size / discount
+        reward = self.board_size ** 2 / discount ** 2
         if (self.check_winning_state_player_one()):
             return reward
         else:

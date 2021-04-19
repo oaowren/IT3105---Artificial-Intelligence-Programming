@@ -57,7 +57,7 @@ def check_for_winning_move(board, D):
         return D
     for i, el in enumerate(D):
         # Set limit at 0.5 as this means this move will be taken based on D no matter what, increase the weight for rbuf
-        if el[1] > 0.5:
+        if el[1] > 0.3:
             # Check for winning move
             board_copy = board.clone()
             board_copy.make_move(el[0])

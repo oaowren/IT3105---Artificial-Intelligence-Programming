@@ -75,7 +75,7 @@ class NeuralNet:
         model = ks.Model(inputs=x, outputs=[actor_output, critic_output])
         losses = {
             "actor_output": "kl_divergence",
-            "critic_output": "mse",
+            "critic_output": "hinge",
         }
         loss_weights = {"actor_output": 1.0, "critic_output": 1.0}
         model.compile(

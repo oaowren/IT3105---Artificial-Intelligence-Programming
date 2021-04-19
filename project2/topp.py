@@ -7,6 +7,7 @@ class TOPP:
         board.reset_board(starting_player)
         player_no = starting_player
         player = actor1 if player_no == 1 else actor2
+        number_of_moves = 0
         if visualize:
             board_visualizer.draw_board(board.board)
             time.sleep(0.5)
@@ -15,6 +16,7 @@ class TOPP:
             preds = player.predict(np.array([split_state]))[0]
             move = player.best_action(preds)
             board.make_move(move)
+            number_of_moves += int(player_no == 1)
             player_no = player_no % 2 + 1
             player = player = actor1 if player_no == 1 else actor2
             if visualize:
@@ -22,6 +24,7 @@ class TOPP:
                 time.sleep(0.5)
         winning_player = 1 if board.check_winning_state_player_one() else 2
         print(f'Player {winning_player} wins!')
+        print(number_of_moves)
         if visualize:
             board_visualizer.draw_board(board.board)
             time.sleep(0.5)
