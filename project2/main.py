@@ -52,9 +52,6 @@ def get_best_move_from_D(D):
     return best_move
 
 def check_for_winning_move(board, D):
-    if (sum(board.flatten_board()) == 0):
-        D = [(el[0], 1.0 if el[0] == (board.board_size//2, board.board_size//2) else 0.0) for el in D]
-        return D
     for i, el in enumerate(D):
         # Set limit at 0.5 as this means this move will be taken based on D no matter what, increase the weight for rbuf
         if el[1] > 0.3:

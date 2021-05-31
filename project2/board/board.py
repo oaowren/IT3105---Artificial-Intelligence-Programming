@@ -132,16 +132,10 @@ class Board:
             )
 
     def get_reward(self, player):
-        discount = 0
-        for row in self.board:
-            for i in row:
-                if i == player:
-                    discount += 1
-        reward = self.board_size ** 2 / discount ** 2
         if (self.check_winning_state_player_one()):
-            return reward
+            return 1
         else:
-            return - reward
+            return - 10
 
     def clone(self):
         return deepcopy(self)

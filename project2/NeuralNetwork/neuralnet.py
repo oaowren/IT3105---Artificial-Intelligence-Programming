@@ -77,7 +77,7 @@ class NeuralNet:
             "actor_output": "kl_divergence",
             "critic_output": "hinge",
         }
-        loss_weights = {"actor_output": 1.0, "critic_output": 1.0}
+        loss_weights = {"actor_output": 1.0, "critic_output": 0.0}
         model.compile(
             optimizer=opt(learning_rate=lr),
             loss=losses,
